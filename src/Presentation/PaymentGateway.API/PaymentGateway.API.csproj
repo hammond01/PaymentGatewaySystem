@@ -8,6 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\PaymentGateway.Domain\PaymentGateway.Domain.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\PaymentGateway.Infrastructure\PaymentGateway.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Shared\PaymentGateway.Ultils\PaymentGateway.Ultils.csproj" />
   </ItemGroup>
 
 </Project>
