@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
+using PaymentGateway.Domain.Entities.ThirdParty;
+using PaymentGateway.Domain.Request;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -26,6 +28,33 @@ public class Helpers
 
         string data = $"{appId}|{merchantName}|{serviceCode}|{countryCode}|{masterMerCode}|{merchantType}|{merchantCode}|{terminalId}|{payType}|{productId}|{txnId}|{amount}|{tipAndFee}|{ccy}|{expDate}|{secretKey}";
         return Caculate(data);
+    }
+    public CreateQR CreateQRRequestToCreateQR(CreateQRRequest createQRRequest)
+    {
+        var data = new CreateQR()
+        {
+            appId = _configuration["JsonStringVNPay:appId"]!,
+            merchantName = createQRRequest.merchantName,
+            serviceCode = _configuration["JsonStringVNPay:serviceCode"]!,
+            countryCode = _configuration["JsonStringVNPay:countryCode"]!,
+            masterMerCode = _configuration["JsonStringVNPay:masterMerCode"]!,
+            merchantType = _configuration["JsonStringVNPay:merchantType"]!,
+            merchantCode = _configuration["JsonStringVNPay:merchantCode"]!,
+            terminalId = createQRRequest.terminalId,
+            payType = _configuration["JsonStringVNPay:payType"]!,
+            productId = createQRRequest.productId,
+            txnId = createQRRequest.txnId,
+            amount = createQRRequest.amount,
+            tipAndFee = createQRRequest.tipAndFee!,
+            ccy = _configuration["JsonStringVNPay:ccy"]!,
+            expDate = _configuration["JsonStringVNPay:expDate"]!,
+            desc = createQRRequest.desc,
+            checksum = _configuration["JsonStringVNPay:checksum"]!,
+            billNumber = createQRRequest.billNumber,
+            consumerId = "",
+            purpose = ""
+        };
+        return data;
     }
     private Task<string> Caculate(string input)
     {
