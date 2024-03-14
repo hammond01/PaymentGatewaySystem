@@ -1,6 +1,4 @@
-﻿using System.Text;
-using System.Text.Json;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PaymentGateway.Domain.Common.ResponseBase;
@@ -8,6 +6,8 @@ using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Domain.Request;
 using PaymentGateway.Domain.Response;
 using PaymentGateway.Ultils.Extension;
+using System.Text;
+using System.Text.Json;
 
 namespace PaymentGateway.Infrastructure.Repositories;
 
@@ -17,6 +17,7 @@ public class VnPayServices : IVnPayServices
     private readonly Helpers _createQrCodeModel;
     private readonly HttpClient _httpClient;
     private readonly ILogger<VnPayServices> _logger;
+
     // ReSharper disable once ConvertToPrimaryConstructor
     public VnPayServices(HttpClient httpClient, IConfiguration configuration, Helpers createQrCodeModel,
         ILogger<VnPayServices> logger)
@@ -95,6 +96,7 @@ public class VnPayServices : IVnPayServices
                     };
             }
         }
+
         return new BaseResult
         {
             IsSuccess = false,

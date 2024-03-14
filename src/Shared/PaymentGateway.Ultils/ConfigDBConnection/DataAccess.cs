@@ -1,8 +1,8 @@
-﻿using System.Data;
-using System.Data.SqlClient;
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Configuration;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace PaymentGateway.Ultils.ConfigDBConnection;
 
