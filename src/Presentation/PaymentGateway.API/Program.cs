@@ -1,6 +1,8 @@
-﻿using PaymentGateway.Domain.Entities.ThirdParty;
-using PaymentGateway.Domain.Repositories;
+﻿using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Infrastructure.Repositories;
+using PaymentGateway.Persistence.Repositories;
+using PaymentGateway.Ultils.ConfigDBConnection;
+using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using PaymentGateway.Ultils.Extension;
 using PaymentGateway.Ultils.Loggers;
 using Serilog;
@@ -36,8 +38,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Helpers>();
-builder.Services.AddSingleton<CreateQR>();
+builder.Services.AddTransient<IDataAccess, DataAccess>();
 builder.Services.AddScoped<IVnPayServices, VnPayServices>();
+builder.Services.AddScoped<IMerchantServices, MerchantServices>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
