@@ -2,7 +2,8 @@
 using PaymentGateway.Domain.Request;
 
 namespace PaymentGateway.Domain.Repositories;
-public interface IVNPayservices
+
+public interface IVnPayServices
 {
-    public Task<BaseResult> CreateQRString(CreateQRRequest createQRRequest);
+    public Task<BaseResult> CreateQrString(CreateQrRequest createQrRequest);
 }

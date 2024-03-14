@@ -1,37 +1,42 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using PaymentGateway.Domain.Common.ResponseBase;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Domain.Request;
 using PaymentGateway.Domain.Response;
 using PaymentGateway.Ultils.Extension;
-using System.Text;
-using System.Text.Json;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Logging;
+
 namespace PaymentGateway.Infrastructure.Repositories;
-public class VNPayservices : IVNPayservices
+
+public class VnPayServices : IVnPayServices
 {
-    private readonly HttpClient _httpClient;
-    private readonly Helpers _createQRCodeModel;
-    private readonly ILogger<VNPayservices> _logger;
     private readonly IConfiguration _configuration;
-    public VNPayservices(HttpClient httpClient, IConfiguration configuration, Helpers createQRCodeModel, ILogger<VNPayservices> logger)
+    private readonly Helpers _createQrCodeModel;
+    private readonly HttpClient _httpClient;
+    private readonly ILogger<VnPayServices> _logger;
+    // ReSharper disable once ConvertToPrimaryConstructor
+    public VnPayServices(HttpClient httpClient, IConfiguration configuration, Helpers createQrCodeModel,
+        ILogger<VnPayServices> logger)
     {
         _httpClient = httpClient;
         _configuration = configuration;
-        _createQRCodeModel = createQRCodeModel;
+        _createQrCodeModel = createQrCodeModel;
         _logger = logger;
     }
-    public async Task<BaseResult> CreateQRString(CreateQRRequest createQRRequest)
+
+    public async Task<BaseResult> CreateQrString(CreateQrRequest createQrRequest)
     {
-        var QRCodeModel = _createQRCodeModel.CreateQRRequestToCreateQR(createQRRequest);
-        _logger.LogInformation($"Create QRCodeModel success");
-        string jsonString = JsonConvert.SerializeObject(QRCodeModel);
+        var qrCodeModel = _createQrCodeModel.CreateQRRequestToCreateQR(createQrRequest);
+        _logger.LogInformation("Create QRCodeModel success");
+        var jsonString = JsonConvert.SerializeObject(qrCodeModel);
         var content = new StringContent(jsonString, Encoding.UTF8, "text/plain");
         var responseJsonString = await _httpClient.PostAsync(_configuration["ThirdParty:createQRUrl"], content);
         if (responseJsonString.IsSuccessStatusCode)
         {
-            _logger.LogInformation($"Send data to ThirdParty success");
+            _logger.LogInformation("Send data to ThirdParty success");
             var response = await responseJsonString.Content.ReadAsStringAsync();
             var json = JsonDocument.Parse(response).RootElement;
             var jsonResponseData = JsonConvert.DeserializeObject<CreateQRStringResponse>(response)!;
@@ -42,7 +47,15 @@ public class VNPayservices : IVNPayservices
             switch (code)
             {
                 case "00":
-                    return new BaseResult { IsSuccess = true, Data = jsonResponseData, Message = "Create QR success", StatusCode = 200 };
+                    //save data to database
+
+                    return new BaseResult
+                    {
+                        IsSuccess = true,
+                        Data = jsonResponseData,
+                        Message = "Create QR success",
+                        StatusCode = 200
+                    };
                 case "01":
                     return new BaseResult { IsSuccess = false, Message = message, StatusCode = 400 };
                 case "04":
@@ -74,9 +87,18 @@ public class VNPayservices : IVNPayservices
                 case "96":
                     return new BaseResult { IsSuccess = false, Message = message, StatusCode = 503 };
                 default:
-                    return new BaseResult { IsSuccess = false, Message = "An error occurred in calling the server", StatusCode = 500 };
+                    return new BaseResult
+                    {
+                        IsSuccess = false,
+                        Message = "VNPay's payment system is having trouble, please choose another payment method",
+                        StatusCode = 500
+                    };
             }
         }
-        return new BaseResult { IsSuccess = false, Message = "An error occurred in calling the server" };
+        return new BaseResult
+        {
+            IsSuccess = false,
+            Message = "VNPay's payment system is having trouble, please choose another payment method"
+        };
     }
 }

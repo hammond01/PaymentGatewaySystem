@@ -1,7 +1,5 @@
-﻿namespace PaymentGateway.Application
-{
+﻿namespace PaymentGateway.Application ;
+
     public class Class1
     {
-
     }
-}

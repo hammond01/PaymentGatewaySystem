@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
+
 namespace PaymentGateway.Ultils.Extension;
+
 public static class Extensions
 {
     private static readonly JsonSerializerOptions serializerOptions = new()
@@ -19,5 +21,4 @@ public static class Extensions
         foreach (var item in list) result.Add(await item);
         return result;
     }
-
 }

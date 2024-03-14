@@ -1,4 +1,5 @@
 ﻿namespace PaymentGateway.Domain.Entities;
+
 public class PaymentTransaction
 {
     public string TransactionId { get; set; } = string.Empty;

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+
 namespace PaymentGateway.Domain.Entities.ThirdParty;
+
 public class CreateQR
 {
     [Required(ErrorMessage = "AppId is required")]
@@ -75,4 +77,3 @@ public class CreateQR
     [MaxLength(32, ErrorMessage = "Checksum cannot exceed 32 characters")]
     public string checksum { get; set; } = string.Empty;
 }
-

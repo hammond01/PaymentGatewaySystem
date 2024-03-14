@@ -1,6 +1,5 @@
 ﻿@page "/weather"
 @inject HttpClient Http
-
 <PageTitle>Weather</PageTitle>
 
 <h1>Weather</h1>
@@ -9,7 +8,9 @@
 
 @if (forecasts == null)
 {
-    <p><em>Loading...</em></p>
+    <p>
+        <em>Loading...</em>
+    </p>
 }
 else
 {
@@ -54,4 +55,5 @@ else
 
         public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
     }
+
 }

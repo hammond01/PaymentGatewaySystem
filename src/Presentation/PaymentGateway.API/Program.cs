@@ -5,8 +5,9 @@ using PaymentGateway.Ultils.Extension;
 using PaymentGateway.Ultils.Loggers;
 using Serilog;
 using Serilog.Formatting.Json;
+
 var builder = WebApplication.CreateBuilder(args);
-builder.Host.UseSerilog((hm, config) =>
+builder.Host.UseSerilog((_, config) =>
 {
     config.WriteTo.Console().MinimumLevel.Information();
     config.WriteTo.File(
@@ -15,15 +16,12 @@ builder.Host.UseSerilog((hm, config) =>
         rollOnFileSizeLimit: true,
         formatter: new JsonFormatter()).MinimumLevel.Information();
 });
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add<LoggingActionFilter>();
-})
-.ConfigureApiBehaviorOptions(options =>
-{
-    // Loại bỏ log của ModelStateInvalidFilter
-    options.SuppressModelStateInvalidFilter = true;
-});
+builder.Services.AddControllers(options => { options.Filters.Add<LoggingActionFilter>(); })
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Loại bỏ log của ModelStateInvalidFilter
+        options.SuppressModelStateInvalidFilter = true;
+    });
 //Register ILogger and LoggerFactory
 builder.Services.AddLogging(loggingBuilder =>
 {
@@ -39,7 +37,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Helpers>();
 builder.Services.AddSingleton<CreateQR>();
-builder.Services.AddScoped<IVNPayservices, VNPayservices>();
+builder.Services.AddScoped<IVnPayServices, VnPayServices>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
