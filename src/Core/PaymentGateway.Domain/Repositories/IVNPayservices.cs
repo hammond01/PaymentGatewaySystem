@@ -1,8 +1,9 @@
-﻿using PaymentGateway.Domain.Common.ResponseModel;
-using PaymentGateway.Domain.Entities.ThirdParty;
+﻿using PaymentGateway.Domain.Common.ResponseBase;
+using PaymentGateway.Domain.Request;
 
 namespace PaymentGateway.Domain.Repositories;
-public interface IVNPayservices
+
+public interface IVnPayServices
 {
-    public Task<BaseResult> CreateQRString(CreateQR createQR);
+    public Task<BaseResult> CreateQrString(CreateQrRequest createQrRequest);
 }

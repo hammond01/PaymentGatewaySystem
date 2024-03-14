@@ -1,4 +1,5 @@
 ﻿namespace PaymentGateway.Domain.Common.ResponseBase;
+
 public class BaseError
 {
     public string Code { get; set; } = string.Empty;

@@ -1,49 +1,83 @@
 ﻿using Microsoft.Extensions.Configuration;
+using PaymentGateway.Domain.Entities.ThirdParty;
+using PaymentGateway.Domain.Request;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace PaymentGateway.Ultils.Extension;
+
 public class Helpers
 {
     public readonly IConfiguration _configuration;
+
     public Helpers(IConfiguration configuration)
     {
         _configuration = configuration;
     }
-    public Task<string> CalculateMD5(string merchantName, string merchantCode,
-        string terminalId, string productId,
-        string txnId, string amount, string tipAndFee)
-    {
-        string appId = _configuration["JsonStringVNPay:appId"]!;
-        string secretKey = _configuration["JsonStringVNPay:secretKey"]!;
-        string serviceCode = _configuration["JsonStringVNPay:serviceCode"]!;
-        string countryCode = _configuration["JsonStringVNPay:countryCode"]!;
-        string payType = _configuration["JsonStringVNPay:payType"]!;
-        string masterMerCode = _configuration["JsonStringVNPay:masterMerCode"]!;
-        string ccy = _configuration["JsonStringVNPay:ccy"]!;
-        string expDate = _configuration["JsonStringVNPay:expDate"]!;
-        string merchantType = _configuration["JsonStringVNPay:merchantType"]!;
 
-        string data = $"{appId}|{merchantName}|{serviceCode}|{countryCode}|{masterMerCode}|{merchantType}|{merchantCode}|{terminalId}|{payType}|{productId}|{txnId}|{amount}|{tipAndFee}|{ccy}|{expDate}|{secretKey}";
-        return Caculate(data);
+    public Task<string> CalculateMD5GenQR(string productId, string txnId, string amount, string tipAndFee)
+    {
+        var appId = _configuration["InformationAPI:GenQR:appId"]!;
+        var secretKey = _configuration["InformationAPI:GenQR:secretKey"]!;
+
+        var merchantCode = _configuration["InformationQR:merchantCode"]!;
+        var merchantType = _configuration["InformationQR:merchantType"]!;
+        var terminalId = _configuration["InformationQR:terminalId"]!;
+        var merchantName = _configuration["InformationQR:merchantName"]!;
+
+        var serviceCode = _configuration["JsonStringVNPay:serviceCode"]!; //default
+        var countryCode = _configuration["JsonStringVNPay:countryCode"]!; //default
+        var payType = _configuration["JsonStringVNPay:payType"]!; //default
+        var masterMerCode = _configuration["JsonStringVNPay:masterMerCode"]!; //default
+        var ccy = _configuration["JsonStringVNPay:ccy"]!; //default
+        var expDate = _configuration["JsonStringVNPay:expDate"]!; //default
+
+        var data =
+            $"{appId}|{merchantName}|{serviceCode}|{countryCode}|{masterMerCode}|{merchantType}|{merchantCode}|{terminalId}|{payType}|{productId}|{txnId}|{amount}|{tipAndFee}|{ccy}|{expDate}|{secretKey}";
+        return CaculateGenQR(data);
     }
-    private Task<string> Caculate(string input)
+
+    public CreateQR CreateQRRequestToCreateQR(CreateQrRequest createQRRequest)
+    {
+        var checkSumValue = CalculateMD5GenQR(createQRRequest.productId, createQRRequest.txnId,
+            createQRRequest.amount, createQRRequest.tipAndFee);
+        var data = new CreateQR
+        {
+            appId = _configuration["InformationAPI:GenQR:appId"]!,
+            serviceCode = _configuration["JsonStringVNPay:serviceCode"]!,
+            countryCode = _configuration["JsonStringVNPay:countryCode"]!,
+            payType = _configuration["JsonStringVNPay:payType"]!,
+            masterMerCode = _configuration["JsonStringVNPay:masterMerCode"]!,
+            ccy = _configuration["JsonStringVNPay:ccy"]!,
+            expDate = _configuration["JsonStringVNPay:expDate"]!,
+            merchantType = _configuration["InformationQR:merchantType"]!,
+            merchantCode = _configuration["InformationQR:merchantCode"]!,
+            terminalId = _configuration["InformationQR:terminalId"]!,
+            merchantName = _configuration["InformationQR:merchantName"]!,
+            checksum = checkSumValue.ToString()!,
+            productId = createQRRequest.productId,
+            txnId = createQRRequest.txnId,
+            amount = createQRRequest.amount,
+            tipAndFee = createQRRequest.tipAndFee!,
+            desc = createQRRequest.desc,
+            billNumber = createQRRequest.billNumber,
+            consumerId = "",
+            purpose = ""
+        };
+        return data;
+    }
+
+    private Task<string> CaculateGenQR(string input)
     {
         return Task.Run(() =>
         {
-            using (MD5 md5 = MD5.Create())
-            {
-                byte[] inputBytes = Encoding.ASCII.GetBytes(input);
-                byte[] hashBytes = md5.ComputeHash(inputBytes);
-
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; i++)
-                {
-                    sb.Append(hashBytes[i].ToString("X2"));
-                }
-                return sb.ToString();
-            }
+            using var md5 = MD5.Create();
+            var inputBytes = Encoding.ASCII.GetBytes(input);
+            var hashBytes = md5.ComputeHash(inputBytes);
+            var sb = new StringBuilder();
+            foreach (var t in hashBytes)
+                sb.Append(t.ToString("X2"));
+            return sb.ToString();
         });
     }
-
 }

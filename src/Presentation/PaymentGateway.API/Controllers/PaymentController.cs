@@ -1,14 +1,35 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-namespace PaymentGateway.API.Controllers
+using PaymentGateway.API.Controllers.Base;
+using PaymentGateway.Domain.Repositories;
+using PaymentGateway.Domain.Request;
+
+namespace PaymentGateway.API.Controllers;
+
+public class PaymentController : PaymentGatewayVNPayVersion
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class PaymentController : ControllerBase
+    private readonly IVnPayServices _vnPayServices;
+    private readonly ILogger<PaymentController> _logger;
+
+    public PaymentController(IVnPayServices vnPayServices, ILogger<PaymentController> logger)
     {
-        [HttpGet]
-        public IActionResult CreateQRCode()
+        _vnPayServices = vnPayServices;
+        _logger = logger;
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateQrCode(CreateQrRequest createQrRequest)
+    {
+        try
         {
-            return Ok("OKLA");
+            _logger.LogInformation("Start service CreateQRString");
+            var data = await _vnPayServices.CreateQrString(createQrRequest);
+            _logger.LogInformation("End service CreateQRString");
+            return Ok(data);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error creating QR string: {ex.Message}");
+            return BadRequest();
         }
     }
 }

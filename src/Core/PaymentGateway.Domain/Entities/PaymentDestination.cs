@@ -1,6 +1,7 @@
 ﻿using PaymentGateway.Domain.Common;
 
 namespace PaymentGateway.Domain.Entities;
+
 public class PaymentDestination : BaseAuditableEntity
 {
     public string DestinationId { get; set; } = string.Empty;

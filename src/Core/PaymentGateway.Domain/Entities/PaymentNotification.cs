@@ -1,4 +1,5 @@
 ﻿namespace PaymentGateway.Domain.Entities;
+
 public class PaymentNotification
 {
     public string NotificationId { get; set; } = string.Empty;
