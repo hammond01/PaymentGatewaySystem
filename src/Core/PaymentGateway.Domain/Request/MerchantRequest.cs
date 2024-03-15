@@ -16,4 +16,10 @@ public class MerchantRequest : BaseAuditableEntity
         public string LastUpdatedBy { get; set; } = string.Empty;
 
     }
+
+    public class CreateMerchant
+    {
+        public string MerchantName { get; set; } = string.Empty;
+        public string CreatedBy { get; set; } = string.Empty;
+    }
 }

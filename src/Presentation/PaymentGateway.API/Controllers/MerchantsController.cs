@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PaymentGateway.Domain.Entities;
 using PaymentGateway.Domain.Repositories;
-using PaymentGateway.Domain.Request;
+using static PaymentGateway.Domain.Request.MerchantRequest;
 
 namespace PaymentGateway.API.Controllers;
 
@@ -17,17 +16,9 @@ public class MerchantsController : ControllerBase
     }
 
     [HttpPost("create-merchant")]
-    public async Task<IActionResult> CreateMerchant()
+    public async Task<IActionResult> CreateMerchant(CreateMerchant createMerchant)
     {
-        var merchant = new Merchant
-        {
-            MerchantId = "M" + Guid.NewGuid(),
-            MerchantName = "Merchant 1",
-            IsActive = true,
-            CreatedBy = "Admin",
-            CreatedAt = DateTime.Now
-        };
-        var data = await _services.CreateMerchant(merchant);
+        var data = await _services.CreateMerchant(createMerchant);
         return Ok(data);
     }
 
@@ -37,10 +28,21 @@ public class MerchantsController : ControllerBase
         var data = await _services.GetMerchants();
         return Ok(data);
     }
-    [HttpPost("update-name-merchant")]
-    public async Task<IActionResult> UpdateNameMerchant(string merchantId, MerchantRequest.UpdateNameMerchant nameMerchant)
+
+    [HttpPost("update-name-merchant-name")]
+    public async Task<IActionResult> UpdateNameMerchant(string merchantId,
+        UpdateNameMerchant nameMerchant)
     {
         var data = await _services.UpdateNameMerchant(merchantId, nameMerchant);
         return Ok(data);
     }
+
+    [HttpPost("is-active-merchant")]
+    public async Task<IActionResult> IsActiveMerchant(string merchantId,
+        IsActiveMerchant activeMerchant)
+    {
+        var data = await _services.IsActiveMerchant(merchantId, activeMerchant);
+        return Ok(data);
+    }
+
 }
