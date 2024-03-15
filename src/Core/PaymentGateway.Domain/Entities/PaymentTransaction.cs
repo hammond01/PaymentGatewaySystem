@@ -9,5 +9,4 @@ public class PaymentTransaction
     public decimal? TransactionAmount { get; set; }
     public DateTime? TransactionDate { get; set; }
     public string? PaymentId { get; set; } = string.Empty;
-    public string? TransactionRefId { get; set; } = string.Empty;
 }

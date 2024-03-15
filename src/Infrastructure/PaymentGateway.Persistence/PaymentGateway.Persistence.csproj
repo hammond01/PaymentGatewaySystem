@@ -6,4 +6,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\Core\PaymentGateway.Domain\PaymentGateway.Domain.csproj" />
+      <ProjectReference Include="..\..\Shared\PaymentGateway.Ultils\PaymentGateway.Ultils.csproj" />
+    </ItemGroup>
+
 </Project>
