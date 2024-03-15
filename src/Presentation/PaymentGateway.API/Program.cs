@@ -1,5 +1,8 @@
 ﻿using PaymentGateway.Domain.Repositories;
+using PaymentGateway.Domain.Repositories.VNPayRestful;
+using PaymentGateway.Domain.Repositories.VNPaySandBox;
 using PaymentGateway.Infrastructure.Repositories;
+using PaymentGateway.Infrastructure.VNPaySandBox.Services;
 using PaymentGateway.Persistence.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
@@ -38,9 +41,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Helpers>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<IDataAccess, DataAccess>();
 builder.Services.AddScoped<IVnPayServices, VnPayServices>();
+builder.Services.AddScoped<IVNPaySandBoxServices, VnPaySandBoxServices>();
 builder.Services.AddScoped<IMerchantServices, MerchantServices>();
+builder.Services.AddScoped<IPaymentServices, PaymentServices>();
+builder.Services.AddScoped<IAuditServices, AuditServices>();
 
 var app = builder.Build();
 
