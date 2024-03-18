@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using PaymentGateway.Domain.Entities.ThirdParty;
 using PaymentGateway.Domain.Request;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -9,10 +11,12 @@ namespace PaymentGateway.Ultils.Extension;
 public class Helpers
 {
     public readonly IConfiguration _configuration;
+    public readonly IHttpContextAccessor _httpContextAccessor;
 
-    public Helpers(IConfiguration configuration)
+    public Helpers(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
     {
         _configuration = configuration;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public Task<string> CalculateMD5GenQR(string productId, string txnId, string amount, string tipAndFee)
@@ -79,5 +83,24 @@ public class Helpers
                 sb.Append(t.ToString("X2"));
             return sb.ToString();
         });
+    }
+    public string GetClientIpAddress()
+    {
+        var ipAddress = _httpContextAccessor.HttpContext!.Connection.RemoteIpAddress;
+
+        // Kiểm tra nếu là IPv6 loopback (::1), trả về IPv4 loopback (127.0.0.1)
+        if (ipAddress!.IsIPv6LinkLocal || ipAddress.IsIPv6SiteLocal || ipAddress.IsIPv6Multicast)
+        {
+            return IPAddress.Loopback.ToString(); // Trả về IPv4 loopback (127.0.0.1)
+        }
+
+        // Chuyển đổi IPv6 thành IPv4 nếu có thể
+        if (ipAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+        {
+            return ipAddress.MapToIPv4().ToString();
+        }
+
+        // Nếu không phải IPv6 hoặc không thể chuyển đổi, trả về địa chỉ IP ban đầu
+        return ipAddress.ToString();
     }
 }

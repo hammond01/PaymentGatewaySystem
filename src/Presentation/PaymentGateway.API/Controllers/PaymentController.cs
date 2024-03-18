@@ -47,8 +47,7 @@ public class PaymentController : PaymentGatewayVNPayVersion
     [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> PaymentCallBack()
     {
-        var response = await _services.PaymentExecute(Request.Query);
-        if (response.VnPayResponseCode != "00") return Ok("Đã xảy ra lỗi");
+        var response = await _services.PaymentExecute(HttpContext, Request.Query);
         return Ok(response);
     }
 }

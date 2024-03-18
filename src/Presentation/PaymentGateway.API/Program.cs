@@ -36,6 +36,7 @@ builder.Services.AddLogging(loggingBuilder =>
 });
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -48,6 +49,9 @@ builder.Services.AddScoped<IVNPaySandBoxServices, VnPaySandBoxServices>();
 builder.Services.AddScoped<IMerchantServices, MerchantServices>();
 builder.Services.AddScoped<IPaymentServices, PaymentServices>();
 builder.Services.AddScoped<IAuditServices, AuditServices>();
+builder.Services.AddScoped<IPaymentTransactionService, PaymentTransactionService>();
+builder.Services.AddScoped<ITransactionCodeService, TransactionCodeService>();
+builder.Services.AddScoped<IDetailTransactionServices, DetailTransactionServices>();
 
 var app = builder.Build();
 
@@ -57,6 +61,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 app.UseHttpsRedirection();
 

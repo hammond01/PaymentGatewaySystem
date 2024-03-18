@@ -22,11 +22,11 @@ public static class Extensions
         return result;
     }
 
-    public static string GetInsertQuery(string table, string idColumn, params string[] props)
+    public static string GetInsertQuery(string table, params string[] props)
     {
         string key = string.Join(", ", props);
         string value = $"@{string.Join(", @", props)}";
-        string query = @$"INSERT INTO {table}({key}) OUTPUT INSERTED.{idColumn} VALUES({value});";
+        string query = @$"INSERT INTO {table}({key}) VALUES({value});";
         return query;
     }
     public static string GetDeleteQueryInt(string table, string idColumn, int props)
@@ -39,6 +39,18 @@ public static class Extensions
         string query = $"DELETE FROM {table} WHERE {idColumn} = '{props}';";
         return query;
     }
+
+    public static string GetUpdateQuery(string table, string id, params string[] props)
+    {
+        if (props == null || props.Length == 0)
+        {
+            throw new ArgumentException("Phải cung cấp ít nhất một thuộc tính.");
+        }
+        string keyValues = string.Join(", ", props.Select(prop => $"{prop} = @{prop}"));
+        string query = @$"UPDATE {table} SET {keyValues} WHERE {id} = @{id};";
+        return query;
+    }
+
     private static readonly Random _random = new Random();
     public static string RamdomNumber()
     {

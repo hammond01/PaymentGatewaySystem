@@ -15,6 +15,7 @@ public class PaymentTransaction
     public decimal? PaidAmount { get; set; }
     public string? PaymentStatus { get; set; } = string.Empty;
     public string? PaymentLastMessage { get; set; } = string.Empty;
+    public string? PaymentCompletionTime { get; set; } = string.Empty;
 
     public static PaymentTransaction GeneratePaymentTransaction(PaymentTransactionRequest request)
     {
@@ -29,8 +30,18 @@ public class PaymentTransaction
             MerchantId = request.MerchantId,
             PaidAmount = request.PaidAmount,
             PaymentStatus = PaymentStatusConstants.Pending,
-            PaymentLastMessage = "Payment is processing!"
+            PaymentLastMessage = "",
+            PaymentCompletionTime = request.PaymentCompletionTime
         };
         return paymentTransaction;
     }
+}
+//update payment transaction when payment is completed
+public class PaymentCompletion
+{
+    public string PaymentTransactionId { get; set; } = string.Empty;
+    public string PaymentStatus { get; set; } = string.Empty;
+    public string PaymentLastMessage { get; set; } = string.Empty;
+    public string PaymentCompletionTime { get; set; } = string.Empty;
+
 }

@@ -41,7 +41,7 @@ public class LoggingActionFilter : IActionFilter
         auditModel.Action = actionName!;
         auditModel.UserId = context.HttpContext.User.Identity!.Name!;
         auditModel.ControllerName = controllerName;
-        _auditServices.InsertAuditLogs(auditModel);
+        //_auditServices.InsertAuditLogs(auditModel);
     }
 
     public void OnActionExecuted(ActionExecutedContext context)
