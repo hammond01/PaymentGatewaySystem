@@ -8,5 +8,5 @@ namespace PaymentGateway.Domain.Repositories.VNPaySandBox;
 public interface IVNPaySandBoxServices
 {
     Task<BaseResultWithData<PaymentUrlResponse>> CreatePaymentUrl(HttpContext context, CreateStringUrl urlString);
-    Task<VNPaySandBoxResponse> PaymentExecute(IQueryCollection queryCollection);
+    Task<BaseResultWithData<object>> PaymentExecute(HttpContext context, IQueryCollection queryCollection);
 }

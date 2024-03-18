@@ -15,7 +15,7 @@ public class PaymentServices : IPaymentServices
     }
     public async Task<BaseResult> CreatePaymentAsync(CreatePayment createPayment)
     {
-        var query = Extensions.GetInsertQuery("Payment", "PaymentId", "PaymentId", "PaymentContent", "PaymentCurrency",
+        var query = Extensions.GetInsertQuery("Payment", "PaymentId", "PaymentContent", "PaymentCurrency",
                        "PaymentDate", "ExpireDate", "PaymentLanguage", "MerchantId", "PaidAmount", "PaymentStatus");
         createPayment.PaymentId = "P" + Guid.NewGuid();
         var result = await _db.SaveData(query, createPayment);

@@ -30,7 +30,7 @@ public class MerchantServices : IMerchantServices
                 CreatedBy = createMerchant.CreatedBy,
                 IsActive = true,
             };
-            var query = Extensions.GetInsertQuery("Merchant", "MerchantId", "MerchantId", "MerchantName", "IsActive",
+            var query = Extensions.GetInsertQuery("Merchant", "MerchantId", "MerchantName", "IsActive",
                 "CreatedBy", "CreatedAt");
 
             var result = await _db.SaveData(query, merchant);

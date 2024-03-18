@@ -5,10 +5,8 @@ public class VNPaySanBoxRequest
     public class CreateStringUrl
     {
         public int OrderId { get; set; }
-        public string FullName { get; set; } = string.Empty;
         public string PaymentContent { get; set; } = string.Empty;
         public decimal Amount { get; set; }
-        public DateTime CreatedDate { get; set; }
         public string? MerchantId { get; set; } = string.Empty;
 
     }
