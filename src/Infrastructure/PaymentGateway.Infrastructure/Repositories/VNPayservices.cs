@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PaymentGateway.Domain.Common.ResponseBase;
-using PaymentGateway.Domain.Repositories;
+using PaymentGateway.Domain.Repositories.VNPayRestful;
 using PaymentGateway.Domain.Request;
 using PaymentGateway.Domain.Response;
 using PaymentGateway.Ultils.Extension;
@@ -53,7 +53,6 @@ public class VnPayServices : IVnPayServices
                     return new BaseResult
                     {
                         IsSuccess = true,
-                        Data = jsonResponseData,
                         Message = "Create QR success",
                         StatusCode = 200
                     };

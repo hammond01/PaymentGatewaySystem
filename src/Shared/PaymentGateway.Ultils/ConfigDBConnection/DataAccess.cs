@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using System.Data;
 using System.Data.SqlClient;
@@ -9,10 +10,12 @@ namespace PaymentGateway.Ultils.ConfigDBConnection;
 public class DataAccess : IDataAccess
 {
     private readonly IConfiguration _config;
+    private readonly ILogger<DataAccess> _logger;
 
-    public DataAccess(IConfiguration config)
+    public DataAccess(IConfiguration config, ILogger<DataAccess> logger)
     {
         _config = config;
+        _logger = logger;
     }
 
     // ReSharper disable once InconsistentNaming
@@ -30,8 +33,9 @@ public class DataAccess : IDataAccess
             await connection.ExecuteAsync(query, parameters);
             return true;
         }
-        catch
+        catch (Exception e)
         {
+            _logger.LogError($"Save database error: {e.Message}");
             return false;
         }
     }

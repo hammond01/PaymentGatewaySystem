@@ -5,6 +5,7 @@ using PaymentGateway.Domain.Request;
 using PaymentGateway.Domain.Response;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using PaymentGateway.Ultils.Extension;
+using static PaymentGateway.Domain.Request.MerchantRequest;
 
 namespace PaymentGateway.Persistence.Repositories;
 
@@ -17,16 +18,25 @@ public class MerchantServices : IMerchantServices
         _db = db;
     }
 
-    public async Task<BaseResult> CreateMerchant(Merchant merchant)
+    public async Task<BaseResult> CreateMerchant(CreateMerchant createMerchant)
     {
         try
         {
-            var query = Extensions.GetInsertQuery("Merchant", "MerchantId", "MerchantId", "MerchantName", "IsActive",
+            var merchant = new Merchant
+            {
+                MerchantId = "M" + Guid.NewGuid(),
+                CreatedAt = DateTime.Now,
+                MerchantName = createMerchant.MerchantName,
+                CreatedBy = createMerchant.CreatedBy,
+                IsActive = true,
+            };
+            var query = Extensions.GetInsertQuery("Merchant", "MerchantId", "MerchantName", "IsActive",
                 "CreatedBy", "CreatedAt");
+
             var result = await _db.SaveData(query, merchant);
             if (result)
                 return new BaseResult
-                { IsSuccess = true, Data = merchant, Message = "Create new merchant success", StatusCode = 200 };
+                { IsSuccess = true, Message = "Create new merchant success", StatusCode = 200 };
             return new BaseResult { IsSuccess = false, Message = "Adding a new record failed!", StatusCode = 404 };
         }
         catch
@@ -50,7 +60,7 @@ public class MerchantServices : IMerchantServices
                           Merchant m";
             var data = await _db.GetData<MerchantResponse, dynamic>(query, new { });
             return new BaseResult
-            { IsSuccess = true, Data = data.ToList(), Message = "Get all merchants success", StatusCode = 200 };
+            { IsSuccess = true, Message = "Get all merchants success", StatusCode = 200 };
         }
         catch
         {
@@ -80,7 +90,7 @@ public class MerchantServices : IMerchantServices
                 { IsSuccess = true, Message = "Successfully updated merchant name.", StatusCode = 200 };
             return new CommandResponse { IsSuccess = false, Message = "Internal server error.", StatusCode = 500 };
         }
-        catch (Exception e)
+        catch
         {
             return new CommandResponse { IsSuccess = false, Message = "Internal server error.", StatusCode = 500 };
         }
@@ -107,7 +117,7 @@ public class MerchantServices : IMerchantServices
                 { IsSuccess = true, Message = "Successfully updated merchant status.", StatusCode = 200 };
             return new CommandResponse { IsSuccess = false, Message = "Internal server error.", StatusCode = 200 };
         }
-        catch (Exception e)
+        catch
         {
             return new CommandResponse { IsSuccess = false, Message = "Internal server error.", StatusCode = 500 };
         }

@@ -1,5 +1,8 @@
 ﻿using PaymentGateway.Domain.Repositories;
+using PaymentGateway.Domain.Repositories.VNPayRestful;
+using PaymentGateway.Domain.Repositories.VNPaySandBox;
 using PaymentGateway.Infrastructure.Repositories;
+using PaymentGateway.Infrastructure.VNPaySandBox.Services;
 using PaymentGateway.Persistence.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
@@ -33,14 +36,21 @@ builder.Services.AddLogging(loggingBuilder =>
 });
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Helpers>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<IDataAccess, DataAccess>();
 builder.Services.AddScoped<IVnPayServices, VnPayServices>();
+builder.Services.AddScoped<IVNPaySandBoxServices, VnPaySandBoxServices>();
 builder.Services.AddScoped<IMerchantServices, MerchantServices>();
+builder.Services.AddScoped<IAuditServices, AuditServices>();
+builder.Services.AddScoped<IPaymentTransactionService, PaymentTransactionService>();
+builder.Services.AddScoped<ITransactionCodeService, TransactionCodeService>();
+builder.Services.AddScoped<IDetailTransactionServices, DetailTransactionServices>();
 
 var app = builder.Build();
 
@@ -50,6 +60,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 app.UseHttpsRedirection();
 
