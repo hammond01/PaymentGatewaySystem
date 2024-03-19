@@ -1,11 +1,12 @@
-﻿using PaymentGateway.Domain.Common.ResponseBase;
+﻿using Dapper;
+using Microsoft.AspNetCore.Http;
+using PaymentGateway.Domain.Common.ResponseBase;
+using PaymentGateway.Domain.Constants;
 using PaymentGateway.Domain.Entities;
 using PaymentGateway.Domain.Repositories;
-using PaymentGateway.Domain.Request;
-using PaymentGateway.Domain.Response;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using PaymentGateway.Ultils.Extension;
-using static PaymentGateway.Domain.Request.MerchantRequest;
+using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
 
@@ -18,7 +19,7 @@ public class MerchantServices : IMerchantServices
         _db = db;
     }
 
-    public async Task<BaseResult> CreateMerchant(CreateMerchant createMerchant)
+    public async Task<BaseResult> CreateMerchant(CreateMerchantModel createMerchant)
     {
         try
         {
@@ -35,17 +36,31 @@ public class MerchantServices : IMerchantServices
 
             var result = await _db.SaveData(query, merchant);
             if (result)
+            {
+                Log.Information(MessageConstantsWithValue.createSuccess("merchant"));
                 return new BaseResult
-                { IsSuccess = true, Message = "Create new merchant success", StatusCode = 200 };
-            return new BaseResult { IsSuccess = false, Message = "Adding a new record failed!", StatusCode = 404 };
+                {
+                    IsSuccess = true,
+                    Message = MessageConstantsWithValue.createSuccess("merchant"),
+                    StatusCode = StatusCodes.Status201Created
+                };
+            }
+            Log.Error(MessageConstantsWithValue.createFail("merchant"));
+            return new BaseResult
+            {
+                IsSuccess = false,
+                Message = MessageConstantsWithValue.createFail("merchant"),
+                StatusCode = StatusCodes.Status404NotFound
+            };
         }
         catch
         {
-            return new BaseResult { IsSuccess = false, Message = "Internal server error!", StatusCode = 500 };
+            Log.Error(MessageConstants.InternalServerError);
+            throw;
         }
     }
 
-    public async Task<BaseResult> GetMerchants()
+    public async Task<BaseResultWithData<List<GetMerchantModel>>> GetMerchants()
     {
         try
         {
@@ -58,24 +73,45 @@ public class MerchantServices : IMerchantServices
                             m.LastUpdatedAt 
                         FROM 
                           Merchant m";
-            var data = await _db.GetData<MerchantResponse, dynamic>(query, new { });
-            return new BaseResult
-            { IsSuccess = true, Message = "Get all merchants success", StatusCode = 200 };
+            var data = await _db.GetData<GetMerchantModel, dynamic>(query, new { });
+            var getMerchantModels = data as List<GetMerchantModel> ?? data.AsList();
+            if (getMerchantModels.Any())
+            {
+                Log.Information(MessageConstantsWithValue.getDataSuccess("all merchant"));
+                return new BaseResultWithData<List<GetMerchantModel>>
+                {
+                    IsSuccess = true,
+                    Data = getMerchantModels,
+                    Message = MessageConstantsWithValue.getDataSuccess("all merchant"),
+                    StatusCode = StatusCodes.Status200OK
+                };
+            }
+            Log.Error(MessageConstantsWithValue.getDataFail("all merchant"));
+            return new BaseResultWithData<List<GetMerchantModel>>
+            {
+                IsSuccess = false,
+                Message = MessageConstantsWithValue.getDataFail("all merchant"),
+                StatusCode = StatusCodes.Status404NotFound
+            };
         }
         catch
         {
-            return new BaseResult { IsSuccess = false, Message = "Internal server error!", StatusCode = 500 };
+            Log.Error(MessageConstants.InternalServerError);
+            throw;
         }
     }
 
-    public async Task<CommandResponse> UpdateNameMerchant(string merchantId,
-        MerchantRequest.UpdateNameMerchant nameMerchant)
+    public async Task<BaseResult> UpdateNameMerchant(string merchantId, UpdateNameMerchantModel nameMerchant)
     {
         try
         {
             if (!await checkMerchantExist(merchantId))
-                return new CommandResponse
-                { IsSuccess = false, Message = "This merchant was not found on the server!", StatusCode = 404 };
+                return new BaseResult
+                {
+                    IsSuccess = false,
+                    Message = MessageConstantsWithValue.notFoundFromDatabase("merchant"),
+                    StatusCode = StatusCodes.Status404NotFound
+                };
             var query = @"UPDATE Merchant 
                           SET MerchantName = @MerchantName, 
                               LastUpdatedBy = @LastUpdatedBy, 
@@ -86,40 +122,72 @@ public class MerchantServices : IMerchantServices
             var data = await _db.SaveData(query,
                 new { MerchantId = merchantId, nameMerchant.MerchantName, nameMerchant.LastUpdatedBy, LastUpdatedAt });
             if (data)
-                return new CommandResponse
-                { IsSuccess = true, Message = "Successfully updated merchant name.", StatusCode = 200 };
-            return new CommandResponse { IsSuccess = false, Message = "Internal server error.", StatusCode = 500 };
+            {
+                Log.Information(MessageConstantsWithValue.updateSuccess("Merchant"));
+                return new BaseResult
+                {
+                    IsSuccess = true,
+                    Message = MessageConstantsWithValue.updateSuccess("Merchant"),
+                    StatusCode = StatusCodes.Status200OK
+                };
+            }
+            Log.Error(MessageConstantsWithValue.updateFail("Merchant"));
+            return new BaseResult
+            {
+                IsSuccess = false,
+                Message = MessageConstantsWithValue.updateFail("Merchant"),
+                StatusCode = StatusCodes.Status404NotFound
+            };
         }
         catch
         {
-            return new CommandResponse { IsSuccess = false, Message = "Internal server error.", StatusCode = 500 };
+            Log.Error(MessageConstants.InternalServerError);
+            throw;
         }
     }
 
-    public async Task<CommandResponse> IsActiveMerchant(string merchantId,
-        MerchantRequest.IsActiveMerchant activeMerchant)
+    public async Task<BaseResult> IsActiveMerchant(string merchantId, IsActiveMerchantModel activeMerchant)
     {
         try
         {
             if (!await checkMerchantExist(merchantId))
-                return new CommandResponse
-                { IsSuccess = false, Message = "This merchant was not found on the server!", StatusCode = 404 };
+                return new BaseResult
+                {
+                    IsSuccess = false,
+                    Message = MessageConstantsWithValue.notFoundFromDatabase("merchant"),
+                    StatusCode = StatusCodes.Status404NotFound
+                };
             var query = @"UPDATE Merchant 
                           SET IsActive = @IsActive, 
                               LastUpdatedBy = @LastUpdatedBy, 
                               LastUpdatedAt = @LastUpdatedAt 
                           WHERE MerchantId = @MerchantId";
             var LastUpdatedAt = DateTime.Now;
+
             var data = await _db.SaveData(query,
                 new { MerchantId = merchantId, activeMerchant.IsActive, activeMerchant.LastUpdatedBy, LastUpdatedAt });
             if (data)
-                return new CommandResponse
-                { IsSuccess = true, Message = "Successfully updated merchant status.", StatusCode = 200 };
-            return new CommandResponse { IsSuccess = false, Message = "Internal server error.", StatusCode = 200 };
+            {
+                Log.Information(MessageConstantsWithValue.updateSuccess("Merchant"));
+                return new BaseResult
+                {
+                    IsSuccess = true,
+                    Message = MessageConstantsWithValue.updateSuccess("Merchant"),
+                    StatusCode = StatusCodes.Status200OK
+                };
+            }
+            Log.Error(MessageConstantsWithValue.updateFail("Merchant"));
+            return new BaseResult
+            {
+                IsSuccess = false,
+                Message = MessageConstantsWithValue.updateFail("Merchant"),
+                StatusCode = StatusCodes.Status404NotFound
+            };
         }
         catch
         {
-            return new CommandResponse { IsSuccess = false, Message = "Internal server error.", StatusCode = 500 };
+            Log.Error(MessageConstants.InternalServerError);
+            throw;
         }
     }
 
