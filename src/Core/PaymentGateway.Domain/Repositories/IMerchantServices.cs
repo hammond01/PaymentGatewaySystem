@@ -1,12 +1,12 @@
 ﻿using PaymentGateway.Domain.Common.ResponseBase;
-using static PaymentGateway.Domain.Request.MerchantRequest;
+using PaymentGateway.Domain.Entities;
 
 namespace PaymentGateway.Domain.Repositories;
 
 public interface IMerchantServices
 {
-    Task<BaseResult> CreateMerchant(CreateMerchant createMerchant);
-    Task<BaseResult> GetMerchants();
-    Task<CommandResponse> UpdateNameMerchant(string merchantId, UpdateNameMerchant nameMerchant);
-    Task<CommandResponse> IsActiveMerchant(string merchantId, IsActiveMerchant activeMerchant);
+    Task<BaseResult> CreateMerchant(CreateMerchantModel createMerchant);
+    Task<BaseResultWithData<List<GetMerchantModel>>> GetMerchants();
+    Task<BaseResult> UpdateNameMerchant(string merchantId, UpdateNameMerchantModel nameMerchant);
+    Task<BaseResult> IsActiveMerchant(string merchantId, IsActiveMerchantModel activeMerchant);
 }
