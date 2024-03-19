@@ -70,3 +70,40 @@ public class CreateStringUrlRequest
     public string? MerchantId { get; set; } = string.Empty;
 
 }
+
+public class RefundRequest
+{
+    public string RequestId { get; set; } = string.Empty;
+    public string Version { get; set; } = string.Empty;
+    public string Command { get; set; } = string.Empty;
+    public string TmnCode { get; set; } = string.Empty;
+    public string TransactionType { get; set; } = string.Empty;
+    public string TxnRef { get; set; } = string.Empty;
+    public string Amount { get; set; } = string.Empty;
+    public string OrderInfo { get; set; } = string.Empty;
+    public string TransactionNo { get; set; } = string.Empty;
+    public string TransactionDate { get; set; } = string.Empty;
+    public string CreateBy { get; set; } = string.Empty;
+    public string CreateDate { get; set; } = string.Empty;
+    public string IpAddr { get; set; } = string.Empty;
+    public string SecureHash { get; set; } = string.Empty;
+}
+
+public class RefundResponse
+{
+    public string ResponseId { get; set; } = string.Empty;
+    public string Command { get; set; } = string.Empty;
+    public string TmnCode { get; set; } = string.Empty;
+    public string TxnRef { get; set; } = string.Empty;
+    public string Amount { get; set; } = string.Empty;
+    public string OrderInfo { get; set; } = string.Empty;
+    public string ResponseCode { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public string BankCode { get; set; } = string.Empty;
+    public string PayDate { get; set; } = string.Empty;
+    public string TransactionNo { get; set; } = string.Empty;
+    public string TransactionType { get; set; } = string.Empty;
+    public string TransactionStatus { get; set; } = string.Empty;
+    public string SecureHash { get; set; } = string.Empty;
+
+}

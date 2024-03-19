@@ -1,6 +1,7 @@
-﻿namespace PaymentGateway.Domain.Response;
+﻿namespace PaymentGateway.Domain.Entities;
 
-public class TransactionCodeResponse
+//in database, this class is a table responseCode
+public class TransactionCode
 {
     public string? ReponseCodeId { get; set; }
     public string? RequestTypeId { get; set; }

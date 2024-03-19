@@ -1,6 +1,6 @@
 ﻿using Dapper;
+using PaymentGateway.Domain.Entities;
 using PaymentGateway.Domain.Repositories;
-using PaymentGateway.Domain.Response;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using Serilog;
 
@@ -17,7 +17,7 @@ public class TransactionCodeService : ITransactionCodeService
         _logger = logger;
     }
 
-    public async Task<List<TransactionCodeResponse>> GetTransactionCodeByTypeAsync(string typeName)
+    public async Task<List<TransactionCode>> GetTransactionCodeByTypeAsync(string typeName)
     {
         try
         {
@@ -29,7 +29,7 @@ public class TransactionCodeService : ITransactionCodeService
                         FROM ResponseCode rc
                         LEFT JOIN RequestType rt ON rc.RequestTypeId = rt.RequestTypeId
                         WHERE rt.RequestName = @typeName";
-            var data = await _db.GetData<TransactionCodeResponse, dynamic>(query, new { typeName });
+            var data = await _db.GetData<TransactionCode, dynamic>(query, new { typeName });
             _logger.Information("Get transaction by type name success.");
             return data.AsList();
         }
@@ -40,7 +40,7 @@ public class TransactionCodeService : ITransactionCodeService
         }
     }
 
-    public async Task<TransactionCodeResponse> GetTransactionCodeByCodeAsync(string code, string requestTypeName)
+    public async Task<TransactionCode> GetTransactionCodeByCodeAsync(string code, string requestTypeName)
     {
         try
         {
@@ -52,7 +52,7 @@ public class TransactionCodeService : ITransactionCodeService
                         FROM ResponseCode rc
                         LEFT JOIN RequestType rt ON rc.RequestTypeId = rt.RequestTypeId
                         WHERE rc.ResponseCode = @code  AND rt.RequestName = @requestTypeName";
-            var data = await _db.GetData<TransactionCodeResponse, dynamic>(query, new { code, requestTypeName });
+            var data = await _db.GetData<TransactionCode, dynamic>(query, new { code, requestTypeName });
             _logger.Information("Get transaction by code success.");
             return data.FirstOrDefault()!;
         }
