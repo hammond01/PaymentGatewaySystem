@@ -47,7 +47,6 @@ builder.Services.AddTransient<IDataAccess, DataAccess>();
 builder.Services.AddScoped<IVnPayServices, VnPayServices>();
 builder.Services.AddScoped<IVNPaySandBoxServices, VnPaySandBoxServices>();
 builder.Services.AddScoped<IMerchantServices, MerchantServices>();
-builder.Services.AddScoped<IPaymentServices, PaymentServices>();
 builder.Services.AddScoped<IAuditServices, AuditServices>();
 builder.Services.AddScoped<IPaymentTransactionService, PaymentTransactionService>();
 builder.Services.AddScoped<ITransactionCodeService, TransactionCodeService>();

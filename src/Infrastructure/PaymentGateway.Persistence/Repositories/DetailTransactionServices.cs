@@ -2,8 +2,6 @@
 using PaymentGateway.Domain.Common.ResponseBase;
 using PaymentGateway.Domain.Entities;
 using PaymentGateway.Domain.Repositories;
-using PaymentGateway.Domain.Request;
-using PaymentGateway.Domain.Response;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using PaymentGateway.Ultils.Extension;
 using Serilog;
@@ -21,12 +19,7 @@ public class DetailTransactionServices : IDetailTransactionServices
         _logger = logger;
     }
 
-    public Task<DetailTransactionResponse> GetDetailTransactionByTransactionId(string transactionId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<BaseResult> InsertDetailTransaction(DetailTransactionRequest detailTransactionRequest)
+    public async Task<BaseResult> InsertDetailTransaction(CreateDetailTransaction detailTransactionRequest)
     {
         try
         {

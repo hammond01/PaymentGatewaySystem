@@ -1,6 +1,4 @@
-﻿using PaymentGateway.Domain.Request;
-
-namespace PaymentGateway.Domain.Entities;
+﻿namespace PaymentGateway.Domain.Entities;
 
 public class DetailTransaction
 {
@@ -13,7 +11,7 @@ public class DetailTransaction
     public string ReponseCodeId { get; set; } = string.Empty;
     public string BankCode { get; set; } = string.Empty;
 
-    public static DetailTransaction DetailTransactionGenerator(DetailTransactionRequest request)
+    public static DetailTransaction DetailTransactionGenerator(CreateDetailTransaction request)
     {
         var detailTransaction = new DetailTransaction
         {
@@ -28,4 +26,13 @@ public class DetailTransaction
         };
         return detailTransaction;
     }
+}
+public class CreateDetailTransaction
+{
+    public string DetailTransactionName { get; set; } = string.Empty;
+    public string DetailTransactionIpAddress { get; set; } = string.Empty;
+    public string DetailTransactionUserId { get; set; } = string.Empty;
+    public string TransactionId { get; set; } = string.Empty;
+    public string ReponseCodeId { get; set; } = string.Empty;
+    public string BankCode { get; set; } = string.Empty;
 }

@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using PaymentGateway.Domain.Common.ResponseBase;
-using PaymentGateway.Domain.Response.VNPaySandBox;
-using static PaymentGateway.Domain.Request.VNPaySandBox.VNPaySanBoxRequest;
+using PaymentGateway.Domain.Entities.ThirdParty.VNPayEntities;
 
 namespace PaymentGateway.Domain.Repositories.VNPaySandBox;
 
 public interface IVNPaySandBoxServices
 {
-    Task<BaseResultWithData<PaymentUrlResponse>> CreatePaymentUrl(HttpContext context, CreateStringUrl urlString);
+    Task<BaseResultWithData<string>> CreatePaymentUrl(HttpContext context, CreateStringUrlRequest urlString);
     Task<BaseResultWithData<object>> PaymentExecute(HttpContext context, IQueryCollection queryCollection);
 }

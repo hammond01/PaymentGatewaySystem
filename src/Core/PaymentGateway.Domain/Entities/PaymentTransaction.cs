@@ -1,5 +1,4 @@
 ﻿using PaymentGateway.Domain.Constants;
-using PaymentGateway.Domain.Request;
 
 namespace PaymentGateway.Domain.Entities;
 
@@ -17,7 +16,7 @@ public class PaymentTransaction
     public string? PaymentLastMessage { get; set; } = string.Empty;
     public string? PaymentCompletionTime { get; set; } = string.Empty;
 
-    public static PaymentTransaction GeneratePaymentTransaction(PaymentTransactionRequest request)
+    public static PaymentTransaction GeneratePaymentTransaction(CreatePaymentTransactionModel request)
     {
         var paymentTransaction = new PaymentTransaction
         {
@@ -44,4 +43,26 @@ public class PaymentCompletion
     public string PaymentLastMessage { get; set; } = string.Empty;
     public string PaymentCompletionTime { get; set; } = string.Empty;
 
+}
+public class CreatePaymentTransactionModel
+{
+    public string PaymentTransactionId { get; set; } = string.Empty;
+    public string PaymentContent { get; set; } = string.Empty;
+    public string PaymentCurrency { get; set; } = string.Empty;
+    public decimal PaidAmount { get; set; }
+    public string? PaymentLanguage { get; set; } = string.Empty;
+    public string? MerchantId { get; set; } = string.Empty;
+    public string? PaymentStatus { get; set; } = string.Empty;
+    public string? IpAddress { get; set; } = string.Empty;
+    public string? PaymentCompletionTime { get; set; } = string.Empty;
+}
+
+public class CheckTransactionStatus
+{
+    public string PaymentTransactionId { get; set; } = string.Empty;
+    public string PaymentContent { get; set; } = string.Empty;
+    public string MerchantName { get; set; } = string.Empty;
+    public decimal PaidAmount { get; set; }
+    public string PaymentStatus { get; set; } = string.Empty;
+    public string? PaymentCompletionTime { get; set; } = string.Empty;
 }
