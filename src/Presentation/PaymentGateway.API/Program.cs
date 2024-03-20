@@ -1,4 +1,9 @@
-﻿using PaymentGateway.Domain.Repositories;
+﻿using MediatR;
+using PaymentGateway.Application.Features.Merchants.Handlers;
+using PaymentGateway.Application.Features.Merchants.Queries;
+using PaymentGateway.Domain.Common.ResponseBase;
+using PaymentGateway.Domain.Entities;
+using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Domain.Repositories.VNPayRestful;
 using PaymentGateway.Domain.Repositories.VNPaySandBox;
 using PaymentGateway.Infrastructure.Repositories;
@@ -51,6 +56,12 @@ builder.Services.AddScoped<IAuditServices, AuditServices>();
 builder.Services.AddScoped<IPaymentTransactionService, PaymentTransactionService>();
 builder.Services.AddScoped<ITransactionCodeService, TransactionCodeService>();
 builder.Services.AddScoped<IDetailTransactionServices, DetailTransactionServices>();
+
+//add mediatR
+builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromAssemblies(typeof(Program).Assembly));
+
+builder.Services.AddTransient<IRequestHandler<GetAllMerchantsQuery, BaseResultWithData<List<GetMerchantModel>>>, GetAllMerchantsHandler>();
+
 
 var app = builder.Build();
 

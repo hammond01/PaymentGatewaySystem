@@ -161,9 +161,9 @@ public class PaymentTransactionService : IPaymentTransactionService
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
-        catch (Exception e)
+        catch
         {
-            Console.WriteLine(e);
+            Log.Error(MessageConstants.InternalServerError);
             throw;
         }
     }

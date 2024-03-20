@@ -79,7 +79,7 @@ public class RefundRequest
     public string TmnCode { get; set; } = string.Empty;
     public string TransactionType { get; set; } = string.Empty;
     public string TxnRef { get; set; } = string.Empty;
-    public string Amount { get; set; } = string.Empty;
+    public long Amount { get; set; }
     public string OrderInfo { get; set; } = string.Empty;
     public string TransactionNo { get; set; } = string.Empty;
     public string TransactionDate { get; set; } = string.Empty;
@@ -89,6 +89,15 @@ public class RefundRequest
     public string SecureHash { get; set; } = string.Empty;
 }
 
+public class RefundRequestClient
+{
+    public string TxnRef { get; set; } = string.Empty;
+    public string Amount { get; set; } = string.Empty;
+    public string TransactionDate { get; set; } = string.Empty;
+    public string TransactionType { get; set; } = string.Empty;
+    public string CreateBy { get; set; } = string.Empty;
+    public string TransactionNo { get; set; } = string.Empty;
+}
 public class RefundResponse
 {
     public string ResponseId { get; set; } = string.Empty;

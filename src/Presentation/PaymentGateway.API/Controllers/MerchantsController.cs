@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using PaymentGateway.Application.Features.Merchants.Queries;
 using PaymentGateway.Domain.Constants;
 using PaymentGateway.Domain.Entities;
 using PaymentGateway.Domain.Repositories;
@@ -11,10 +13,12 @@ namespace PaymentGateway.API.Controllers;
 public class MerchantsController : ControllerBase
 {
     private readonly IMerchantServices _services;
+    private readonly IMediator _sender;
 
-    public MerchantsController(IMerchantServices services)
+    public MerchantsController(IMerchantServices services, IMediator sender)
     {
         _services = services;
+        _sender = sender;
     }
 
     [HttpPost("create-merchant")]
@@ -35,14 +39,14 @@ public class MerchantsController : ControllerBase
     [HttpGet("get-all-merchant")]
     public async Task<IActionResult> GetMerchants()
     {
+        //CQRS pattern
         try
         {
-            var data = await _services.GetMerchants();
+            var data = await _sender.Send(new GetAllMerchantsQuery());
             return Ok(data);
         }
         catch
         {
-            Log.Error(MessageConstants.InternalServerError);
             return StatusCode(500, MessageConstants.InternalServerError);
         }
     }
@@ -57,7 +61,6 @@ public class MerchantsController : ControllerBase
         }
         catch
         {
-            Log.Error(MessageConstants.InternalServerError);
             return StatusCode(500, MessageConstants.InternalServerError);
         }
     }
@@ -72,7 +75,6 @@ public class MerchantsController : ControllerBase
         }
         catch
         {
-            Log.Error(MessageConstants.InternalServerError);
             return StatusCode(500, MessageConstants.InternalServerError);
         }
     }

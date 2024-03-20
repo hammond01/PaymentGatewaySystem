@@ -49,7 +49,6 @@ public class PaymentController : PaymentGatewayVNPayVersion
         }
         catch
         {
-            Log.Error(MessageConstants.InternalServerError);
             return StatusCode(500, MessageConstants.InternalServerError);
         }
     }
@@ -64,7 +63,6 @@ public class PaymentController : PaymentGatewayVNPayVersion
         }
         catch
         {
-            Log.Error(MessageConstants.InternalServerError);
             return StatusCode(500, MessageConstants.InternalServerError);
         }
     }
@@ -79,7 +77,20 @@ public class PaymentController : PaymentGatewayVNPayVersion
         }
         catch
         {
-            Log.Error(MessageConstants.InternalServerError);
+            return StatusCode(500, MessageConstants.InternalServerError);
+        }
+    }
+
+    [HttpPost("refund-with-sandbox")]
+    public async Task<IActionResult> Refund(RefundRequestClient request)
+    {
+        try
+        {
+            var response = await _services.Refund(HttpContext, request);
+            return Ok(response);
+        }
+        catch
+        {
             return StatusCode(500, MessageConstants.InternalServerError);
         }
     }
