@@ -9,4 +9,5 @@ public interface IVNPaySandBoxServices
     Task<BaseResultWithData<string>> CreatePaymentUrl(HttpContext context, CreateStringUrlRequest urlString);
     Task<BaseResultWithData<object>> PaymentExecute(HttpContext context, IQueryCollection queryCollection);
     Task<BaseResultWithData<object>> Refund(HttpContext context, RefundRequestClient refundRequest);
+    Task<BaseResultWithData<object>> GetTransactionDetail(HttpContext context, string transactionId);
 }

@@ -73,7 +73,9 @@ public class VnPaySandBoxServices : IVNPaySandBoxServices
                 _configuration["VNPaySanBox:HashSecret"]);
 
             #endregion
-
+            var checkMessage =
+                await _transactionCodeService.GetTransactionCodeByCodeAsync(ResponseCodeConstants.AWAITING_PAYMENT,
+                    RequestTypeTransactionConstants.COMMON_TRANSACTION);
             //Customer create Payment
             var createPayment = new CreatePaymentTransactionModel
             {
@@ -83,8 +85,12 @@ public class VnPaySandBoxServices : IVNPaySandBoxServices
                 PaidAmount = urlString.Amount,
                 PaymentLanguage = createPaymentUrlModel.Locale.ToUpper(),
                 MerchantId = urlString.MerchantId,
-                PaymentStatus = PaymentStatusConstants.Pending,
-                IpAddress = createPaymentUrlModel.IpAddr
+                PaymentStatus = checkMessage.Message,
+                IpAddress = createPaymentUrlModel.IpAddr,
+                ReponseCodeId = checkMessage.ReponseCodeId,
+                Channel = urlString.Channel,
+                ClientName = urlString.ClientName,
+                PaymentLastMessage = urlString.LastMessage
             };
             //add paymnet transaction to database
             var createPaymentAsync = await _paymentTransactionService.CreatePaymentTransactionAsync(createPayment);
@@ -266,5 +272,10 @@ public class VnPaySandBoxServices : IVNPaySandBoxServices
             Console.WriteLine(e);
             throw;
         }
+    }
+
+    public Task<BaseResultWithData<object>> GetTransactionDetail(HttpContext context, string transactionId)
+    {
+        throw new NotImplementedException();
     }
 }

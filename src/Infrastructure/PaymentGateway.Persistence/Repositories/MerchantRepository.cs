@@ -10,11 +10,11 @@ using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
 
-public class MerchantService : IMerchantService
+public class MerchantRepository : IMerchantService
 {
     private readonly IDataAccess _db;
 
-    public MerchantService(IDataAccess db)
+    public MerchantRepository(IDataAccess db)
     {
         _db = db;
     }
@@ -30,9 +30,10 @@ public class MerchantService : IMerchantService
                 MerchantName = createMerchant.MerchantName,
                 CreatedBy = createMerchant.CreatedBy,
                 IsActive = true,
+                Deleted = false
             };
             var query = Extensions.GetInsertQuery("Merchant", "MerchantId", "MerchantName", "IsActive",
-                "CreatedBy", "CreatedAt");
+                "CreatedBy", "CreatedAt", "Deleted");
 
             var result = await _db.SaveData(query, merchant);
             if (result)
@@ -65,14 +66,15 @@ public class MerchantService : IMerchantService
         try
         {
             var query = @"SELECT 
+                            m.MerchantId,
                             m.MerchantName, 
                             m.IsActive, 
                             m.CreatedBy, 
                             m.CreatedAt, 
                             m.LastUpdatedBy, 
-                            m.LastUpdatedAt 
+                            m.LastUpdatedAt,
                         FROM 
-                          Merchant m";
+                          Merchant m WHERE m.Deleted = 0";
             var data = await _db.GetData<GetMerchantModel, dynamic>(query, new { });
             var getMerchantModels = data as List<GetMerchantModel> ?? data.AsList();
             if (getMerchantModels.Any())
@@ -191,6 +193,52 @@ public class MerchantService : IMerchantService
         }
     }
 
+    public async Task<BaseResult> DeleteMerchant(int id, DeleteMerchantModel activeMerchant)
+    {
+        try
+        {
+            if (!await checkMerchantExist(id))
+                return new BaseResult
+                {
+                    IsSuccess = false,
+                    Message = MessageConstantsWithValue.notFoundFromDatabase("merchant"),
+                    StatusCode = StatusCodes.Status404NotFound
+                };
+            var query = @"UPDATE Merchant 
+                          SET Deleted = 1, 
+                              LastUpdatedBy = @LastUpdatedBy, 
+                              LastUpdatedAt = @LastUpdatedAt 
+                          WHERE Id = @Id";
+            Console.WriteLine(query);
+            var LastUpdatedAt = DateTime.Now;
+
+            var data = await _db.SaveData(query,
+                new { Id = id, activeMerchant.LastUpdatedBy, LastUpdatedAt });
+            if (data)
+            {
+                Log.Information(MessageConstantsWithValue.deleteSuccess("Merchant"));
+                return new BaseResult
+                {
+                    IsSuccess = true,
+                    Message = MessageConstantsWithValue.deleteSuccess("Merchant"),
+                    StatusCode = StatusCodes.Status200OK
+                };
+            }
+            Log.Error(MessageConstantsWithValue.deleteFail("Merchant"));
+            return new BaseResult
+            {
+                IsSuccess = false,
+                Message = MessageConstantsWithValue.deleteFail("Merchant"),
+                StatusCode = StatusCodes.Status404NotFound
+            };
+        }
+        catch
+        {
+            Log.Error(MessageConstants.InternalServerError);
+            throw;
+        }
+    }
+
     private async Task<bool> checkMerchantExist(string merchantId)
     {
         var query = @"SELECT 
@@ -200,6 +248,18 @@ public class MerchantService : IMerchantService
                       WHERE 
                         MerchantId = @MerchantId";
         var data = await _db.GetData<int, dynamic>(query, new { MerchantId = merchantId });
+        return data.FirstOrDefault() > 0;
+    }
+
+    private async Task<bool> checkMerchantExist(int id)
+    {
+        var query = @"SELECT 
+                        COUNT(1) 
+                      FROM 
+                        Merchant 
+                      WHERE 
+                        Id = @Id";
+        var data = await _db.GetData<int, dynamic>(query, new { Id = id });
         return data.FirstOrDefault() > 0;
     }
 }

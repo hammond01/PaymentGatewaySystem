@@ -68,7 +68,9 @@ public class CreateStringUrlRequest
     public string PaymentContent { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public string? MerchantId { get; set; } = string.Empty;
-
+    public string? Channel { get; set; } = string.Empty;
+    public string? ClientName { get; set; } = string.Empty;
+    public string? LastMessage { get; set; } = string.Empty;
 }
 
 public class RefundRequest

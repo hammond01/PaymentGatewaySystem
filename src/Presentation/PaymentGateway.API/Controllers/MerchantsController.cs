@@ -78,4 +78,18 @@ public class MerchantsController : ControllerBase
             return StatusCode(500, MessageConstants.InternalServerError);
         }
     }
+
+    [HttpDelete("delete-merchant")]
+    public async Task<IActionResult> DeleteMerchant(int id, DeleteMerchantModel deleteMerchant)
+    {
+        try
+        {
+            var data = await _services.DeleteMerchant(id, deleteMerchant);
+            return Ok(data);
+        }
+        catch
+        {
+            return StatusCode(500, MessageConstants.InternalServerError);
+        }
+    }
 }

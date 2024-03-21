@@ -6,12 +6,12 @@ using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
 
-public class TransactionCodeService : ITransactionCodeService
+public class TransactionCodeRepository : ITransactionCodeService
 {
     private readonly IDataAccess _db;
     private readonly ILogger _logger;
 
-    public TransactionCodeService(IDataAccess db, ILogger logger)
+    public TransactionCodeRepository(IDataAccess db, ILogger logger)
     {
         _db = db;
         _logger = logger;

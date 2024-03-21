@@ -6,11 +6,11 @@ using PaymentGateway.Ultils.Extension;
 
 namespace PaymentGateway.Persistence.Repositories;
 
-public class AuditServices : IAuditServices
+public class AuditRepository : IAuditServices
 {
     private readonly IDataAccess _db;
 
-    public AuditServices(IDataAccess db)
+    public AuditRepository(IDataAccess db)
     {
         _db = db;
     }

@@ -9,13 +9,13 @@ using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
 
-public class PaymentTransactionService : IPaymentTransactionService
+public class PaymentTransactionRepository : IPaymentTransactionService
 {
     private readonly IDataAccess _db;
     private readonly IDetailTransactionServices _detailTransactionServices;
     private readonly ITransactionCodeService _transactionCodeService;
 
-    public PaymentTransactionService(IDataAccess db, IDetailTransactionServices detailTransactionServices,
+    public PaymentTransactionRepository(IDataAccess db, IDetailTransactionServices detailTransactionServices,
         ITransactionCodeService transactionCodeService)
     {
         _db = db;
@@ -31,7 +31,7 @@ public class PaymentTransactionService : IPaymentTransactionService
             var query = Extensions.GetInsertQuery("PaymentTransaction", "PaymentTransactionId",
                 "PaymentContent", "PaymentCurrency", "PaymentDate",
                 "ExpireDate", "PaymentLanguage", "MerchantId", "PaidAmount", "PaymentStatus", "PaymentLastMessage",
-                "PaymentCompletionTime");
+                "PaymentCompletionTime", "Channel", "ClientName", "ReponseCodeId");
             var paymentTransactionModel = PaymentTransaction.GeneratePaymentTransaction(paymentTransactionRequest);
             var result = await _db.SaveData(query, paymentTransactionModel);
             if (result)
@@ -139,7 +139,7 @@ public class PaymentTransactionService : IPaymentTransactionService
                         FROM PaymentTransaction p
                         LEFT JOIN Merchant m ON p.MerchantId = m.MerchantId
                         WHERE p.PaymentTransactionId = @transactionId";
-            var result = await _db.GetData<CheckTransactionStatus, dynamic>(query, new { transactionId })!;
+            var result = await _db.GetData<CheckTransactionStatus, dynamic>(query, new { transactionId });
 
             var checkTransactionStatusEnumerable = result as List<CheckTransactionStatus> ?? result.ToList();
             if (checkTransactionStatusEnumerable.Any())

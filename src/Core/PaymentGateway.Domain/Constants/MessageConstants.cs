@@ -14,4 +14,6 @@ public class MessageConstantsWithValue
     public static string getDataSuccess(string serviceName) => $"Get {serviceName} successfully";
     public static string getDataFail(string serviceName) => $"Get {serviceName} fail";
     public static string notFoundFromDatabase(string serviceName) => $"This {serviceName} not found from database";
+    public static string deleteSuccess(string serviceName) => $"Delete {serviceName} successfully";
+    public static string deleteFail(string serviceName) => $"Delete {serviceName} fail";
 }
