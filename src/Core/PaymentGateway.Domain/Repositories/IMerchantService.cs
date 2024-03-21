@@ -3,7 +3,7 @@ using PaymentGateway.Domain.Entities;
 
 namespace PaymentGateway.Domain.Repositories;
 
-public interface IMerchantServices
+public interface IMerchantService
 {
     Task<BaseResult> CreateMerchant(CreateMerchantModel createMerchant);
     Task<BaseResultWithData<List<GetMerchantModel>>> GetMerchants();

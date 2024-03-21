@@ -51,11 +51,11 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<IDataAccess, DataAccess>();
 builder.Services.AddScoped<IVnPayServices, VnPayServices>();
 builder.Services.AddScoped<IVNPaySandBoxServices, VnPaySandBoxServices>();
-builder.Services.AddScoped<IMerchantServices, MerchantServices>();
+builder.Services.AddScoped<IMerchantService, MerchantService>();
 builder.Services.AddScoped<IAuditServices, AuditServices>();
 builder.Services.AddScoped<IPaymentTransactionService, PaymentTransactionService>();
 builder.Services.AddScoped<ITransactionCodeService, TransactionCodeService>();
-builder.Services.AddScoped<IDetailTransactionServices, DetailTransactionServices>();
+builder.Services.AddScoped<IDetailTransactionServices, DetailTransactionService>();
 
 //add mediatR
 builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromAssemblies(typeof(Program).Assembly));

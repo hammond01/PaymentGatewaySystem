@@ -8,12 +8,12 @@ using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
 
-public class DetailTransactionServices : IDetailTransactionServices
+public class DetailTransactionService : IDetailTransactionServices
 {
     private readonly IDataAccess _db;
     private readonly ILogger _logger;
 
-    public DetailTransactionServices(IDataAccess db, ILogger logger)
+    public DetailTransactionService(IDataAccess db, ILogger logger)
     {
         _db = db;
         _logger = logger;

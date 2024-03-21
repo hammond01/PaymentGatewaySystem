@@ -10,11 +10,11 @@ using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
 
-public class MerchantServices : IMerchantServices
+public class MerchantService : IMerchantService
 {
     private readonly IDataAccess _db;
 
-    public MerchantServices(IDataAccess db)
+    public MerchantService(IDataAccess db)
     {
         _db = db;
     }

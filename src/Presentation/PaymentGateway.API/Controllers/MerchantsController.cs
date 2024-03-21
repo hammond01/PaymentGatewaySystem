@@ -12,10 +12,10 @@ namespace PaymentGateway.API.Controllers;
 [ApiController]
 public class MerchantsController : ControllerBase
 {
-    private readonly IMerchantServices _services;
+    private readonly IMerchantService _services;
     private readonly IMediator _sender;
 
-    public MerchantsController(IMerchantServices services, IMediator sender)
+    public MerchantsController(IMerchantService services, IMediator sender)
     {
         _services = services;
         _sender = sender;
