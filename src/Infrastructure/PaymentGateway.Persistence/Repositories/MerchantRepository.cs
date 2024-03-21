@@ -5,7 +5,6 @@ using PaymentGateway.Domain.Constants;
 using PaymentGateway.Domain.Entities;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
-using PaymentGateway.Ultils.Extension;
 using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
@@ -19,10 +18,17 @@ public class MerchantRepository : IMerchantService
         _db = db;
     }
 
+
+    /// <summary>
+    ///     Creates a new merchant in the system.
+    /// </summary>
+    /// <param name="createMerchant">The details of the merchant to be created.</param>
+    /// <returns>A <see cref="BaseResult" /> indicating whether the operation was successful.</returns>
     public async Task<BaseResult> CreateMerchant(CreateMerchantModel createMerchant)
     {
         try
         {
+            // Create a new merchant entity
             var merchant = new Merchant
             {
                 MerchantId = "M" + Guid.NewGuid(),
@@ -32,12 +38,12 @@ public class MerchantRepository : IMerchantService
                 IsActive = true,
                 Deleted = false
             };
-            var query = Extensions.GetInsertQuery("Merchant", "MerchantId", "MerchantName", "IsActive",
-                "CreatedBy", "CreatedAt", "Deleted");
 
-            var result = await _db.SaveData(query, merchant);
+            // Insert the merchant into the database
+            var result = await _db.InsertData("Merchant", merchant);
             if (result)
             {
+                // Log the creation success
                 Log.Information(MessageConstantsWithValue.createSuccess("merchant"));
                 return new BaseResult
                 {
@@ -46,6 +52,8 @@ public class MerchantRepository : IMerchantService
                     StatusCode = StatusCodes.Status201Created
                 };
             }
+
+            // Log the creation failure
             Log.Error(MessageConstantsWithValue.createFail("merchant"));
             return new BaseResult
             {
@@ -56,6 +64,7 @@ public class MerchantRepository : IMerchantService
         }
         catch
         {
+            // Log the internal server error
             Log.Error(MessageConstants.InternalServerError);
             throw;
         }
@@ -65,16 +74,16 @@ public class MerchantRepository : IMerchantService
     {
         try
         {
-            var query = @"SELECT 
-                            m.MerchantId,
-                            m.MerchantName, 
-                            m.IsActive, 
-                            m.CreatedBy, 
-                            m.CreatedAt, 
-                            m.LastUpdatedBy, 
-                            m.LastUpdatedAt,
-                        FROM 
-                          Merchant m WHERE m.Deleted = 0";
+            var query = @"SELECT
+                            MerchantId,
+                            MerchantName,
+                            IsActive,
+                            CreatedBy,
+                            CreatedAt,
+                            LastUpdatedBy,
+                            LastUpdatedAt,
+                        FROM
+                          Merchant WHERE Deleted = 0";
             var data = await _db.GetData<GetMerchantModel, dynamic>(query, new { });
             var getMerchantModels = data as List<GetMerchantModel> ?? data.AsList();
             if (getMerchantModels.Any())
@@ -88,6 +97,7 @@ public class MerchantRepository : IMerchantService
                     StatusCode = StatusCodes.Status200OK
                 };
             }
+
             Log.Error(MessageConstantsWithValue.getDataFail("all merchant"));
             return new BaseResultWithData<List<GetMerchantModel>>
             {
@@ -114,15 +124,14 @@ public class MerchantRepository : IMerchantService
                     Message = MessageConstantsWithValue.notFoundFromDatabase("merchant"),
                     StatusCode = StatusCodes.Status404NotFound
                 };
-            var query = @"UPDATE Merchant 
-                          SET MerchantName = @MerchantName, 
-                              LastUpdatedBy = @LastUpdatedBy, 
-                              LastUpdatedAt = @LastUpdatedAt 
-                          WHERE MerchantId = @MerchantId";
-            var LastUpdatedAt = DateTime.Now;
+            var req = new Merchant
+            {
+                MerchantName = nameMerchant.MerchantName,
+                LastUpdatedAt = DateTime.Now,
+                LastUpdatedBy = nameMerchant.LastUpdatedBy
+            };
 
-            var data = await _db.SaveData(query,
-                new { MerchantId = merchantId, nameMerchant.MerchantName, nameMerchant.LastUpdatedBy, LastUpdatedAt });
+            var data = await _db.UpdateData("Merchant", merchantId, req);
             if (data)
             {
                 Log.Information(MessageConstantsWithValue.updateSuccess("Merchant"));
@@ -133,6 +142,7 @@ public class MerchantRepository : IMerchantService
                     StatusCode = StatusCodes.Status200OK
                 };
             }
+
             Log.Error(MessageConstantsWithValue.updateFail("Merchant"));
             return new BaseResult
             {
@@ -159,15 +169,15 @@ public class MerchantRepository : IMerchantService
                     Message = MessageConstantsWithValue.notFoundFromDatabase("merchant"),
                     StatusCode = StatusCodes.Status404NotFound
                 };
-            var query = @"UPDATE Merchant 
-                          SET IsActive = @IsActive, 
-                              LastUpdatedBy = @LastUpdatedBy, 
-                              LastUpdatedAt = @LastUpdatedAt 
-                          WHERE MerchantId = @MerchantId";
-            var LastUpdatedAt = DateTime.Now;
 
-            var data = await _db.SaveData(query,
-                new { MerchantId = merchantId, activeMerchant.IsActive, activeMerchant.LastUpdatedBy, LastUpdatedAt });
+            var req = new Merchant
+            {
+                IsActive = activeMerchant.IsActive,
+                LastUpdatedBy = activeMerchant.LastUpdatedBy,
+                LastUpdatedAt = DateTime.Now
+            };
+
+            var data = await _db.UpdateData("Merchant", merchantId, req);
             if (data)
             {
                 Log.Information(MessageConstantsWithValue.updateSuccess("Merchant"));
@@ -178,6 +188,7 @@ public class MerchantRepository : IMerchantService
                     StatusCode = StatusCodes.Status200OK
                 };
             }
+
             Log.Error(MessageConstantsWithValue.updateFail("Merchant"));
             return new BaseResult
             {
@@ -204,12 +215,12 @@ public class MerchantRepository : IMerchantService
                     Message = MessageConstantsWithValue.notFoundFromDatabase("merchant"),
                     StatusCode = StatusCodes.Status404NotFound
                 };
-            var query = @"UPDATE Merchant 
-                          SET Deleted = 1, 
-                              LastUpdatedBy = @LastUpdatedBy, 
-                              LastUpdatedAt = @LastUpdatedAt 
+            var query = @"UPDATE Merchant
+                          SET Deleted = 1,
+                              LastUpdatedBy = @LastUpdatedBy,
+                              LastUpdatedAt = @LastUpdatedAt
                           WHERE Id = @Id";
-            Console.WriteLine(query);
+
             var LastUpdatedAt = DateTime.Now;
 
             var data = await _db.SaveData(query,
@@ -224,6 +235,7 @@ public class MerchantRepository : IMerchantService
                     StatusCode = StatusCodes.Status200OK
                 };
             }
+
             Log.Error(MessageConstantsWithValue.deleteFail("Merchant"));
             return new BaseResult
             {
@@ -241,11 +253,11 @@ public class MerchantRepository : IMerchantService
 
     private async Task<bool> checkMerchantExist(string merchantId)
     {
-        var query = @"SELECT 
-                        COUNT(1) 
-                      FROM 
-                        Merchant 
-                      WHERE 
+        var query = @"SELECT
+                        COUNT(1)
+                      FROM
+                        Merchant
+                      WHERE
                         MerchantId = @MerchantId";
         var data = await _db.GetData<int, dynamic>(query, new { MerchantId = merchantId });
         return data.FirstOrDefault() > 0;
@@ -253,11 +265,11 @@ public class MerchantRepository : IMerchantService
 
     private async Task<bool> checkMerchantExist(int id)
     {
-        var query = @"SELECT 
-                        COUNT(1) 
-                      FROM 
-                        Merchant 
-                      WHERE 
+        var query = @"SELECT
+                        COUNT(1)
+                      FROM
+                        Merchant
+                      WHERE
                         Id = @Id";
         var data = await _db.GetData<int, dynamic>(query, new { Id = id });
         return data.FirstOrDefault() > 0;

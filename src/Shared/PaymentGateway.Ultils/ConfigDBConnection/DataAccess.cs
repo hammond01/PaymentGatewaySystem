@@ -149,6 +149,22 @@ public class DataAccess : IDataAccess
         }
     }
 
+    public async Task<IEnumerable<T>> LoadData<T, TP>(string tableName, TP parameters, string connectionId = "SQL")
+    {
+        try
+        {
+            using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
+            var primaryKeyColumnName = await GetPrimaryKey(tableName, connectionId);
+            var query = $"SELECT * FROM {tableName} WHERE {primaryKeyColumnName} = @{primaryKeyColumnName}";
+            return await connection.QueryAsync<T>(query, parameters);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
     private async Task<string> GetPrimaryKey(string tableName, string connectionString = "SQL")
     {
         try
@@ -159,7 +175,7 @@ public class DataAccess : IDataAccess
                             WHERE OBJECTPROPERTY(OBJECT_ID(CONSTRAINT_SCHEMA + '.' + CONSTRAINT_NAME), 'IsPrimaryKey') = 1
                             AND TABLE_NAME = '{tableName}';";
             var data = await connection.QuerySingleAsync<string>(query, new { });
-            return data!;
+            return data;
         }
         catch
         {

@@ -47,7 +47,7 @@ namespace PaymentGateway.API.Controllers
         {
             var merchant = new UpdateNameMerchantModel()
             {
-                LastUpdatedAt = DateTime.Now,
+                //LastUpdatedAt = DateTime.Now,
                 LastUpdatedBy = "update test",
                 MerchantName = "update",
             };
