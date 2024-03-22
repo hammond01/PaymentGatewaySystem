@@ -30,7 +30,7 @@ public class AuditRepository : IAuditServices
                 ControllerName = auditRequest.ControllerName,
                 PaymentStatus = auditRequest.PaymentStatus
             };
-            var query = Extensions.GetInsertQuery("Audit", "AuditLogId", "UserId", "Action", "CreatedAt",
+            var query = Extension.GetInsertQuery("Audit", "AuditLogId", "UserId", "Action", "CreatedAt",
                 "ActionStatus", "ActionIp", "ControllerName", "PaymentStatus");
             _db.SaveData(query, auditModel);
         }

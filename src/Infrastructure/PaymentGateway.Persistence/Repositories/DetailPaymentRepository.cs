@@ -31,7 +31,7 @@ public class DetailPaymentRepository : IDetailPaymentService
         }
         catch
         {
-            Log.Error(MessageConstantsWithValue.createFail("detail payment"));
+            Log.Error(MessageConstantsWithValue.createFail("detail payment", ""));
             throw;
         }
     }

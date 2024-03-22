@@ -9,6 +9,7 @@
 	<ItemGroup>
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+		<PackageReference Include="IdGen" Version="3.0.5" />
 	</ItemGroup>
 
 	<ItemGroup>

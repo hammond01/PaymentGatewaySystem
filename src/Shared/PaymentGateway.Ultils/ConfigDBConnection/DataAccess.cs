@@ -22,8 +22,16 @@ public class DataAccess : IDataAccess
     // ReSharper disable once InconsistentNaming
     public async Task<IEnumerable<T>> GetData<T, P>(string query, P parameters, string connectionId = "SQL")
     {
-        using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
-        return await connection.QueryAsync<T>(query, parameters);
+        try
+        {
+            using IDbConnection connection = new SqlConnection(_config.GetConnectionString(connectionId));
+            return await connection.QueryAsync<T>(query, parameters);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Save database error: {e.Message}");
+            throw;
+        }
     }
 
     public async Task<bool> SaveData<P>(string query, P parameters, string connectionId = "SQL")
@@ -52,7 +60,6 @@ public class DataAccess : IDataAccess
                     WHERE TABLE_NAME = @TableName AND COLUMN_NAME != 'Id'",
                 new { TableName = tableName });
             var dynamicParameters = new DynamicParameters();
-
             var enumerable = columns.ToList();
             foreach (var column in enumerable)
             {
@@ -67,9 +74,9 @@ public class DataAccess : IDataAccess
             await connection.ExecuteAsync(insertQuery, parameters);
             return true;
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error($"Insert data to table {tableName} error.");
+            Log.Error($"Insert data to table {tableName} error: {e.Message}");
             throw;
         }
     }
@@ -104,9 +111,9 @@ public class DataAccess : IDataAccess
             await connection.ExecuteAsync(updateQuery, dynamicParameters);
             return true;
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error($"Update data from table {tableName} error.");
+            Log.Error($"Update data from table {tableName} error: {e.Message}");
             throw;
         }
     }
@@ -122,15 +129,15 @@ public class DataAccess : IDataAccess
             await connection.ExecuteAsync(deleteQuery, parameters);
             return true;
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error($"Delete data from table {tableName} error.");
+            Log.Error($"Delete data from table {tableName} error: {e.Message}");
             throw;
         }
     }
 
     //Delete on the interface still saves data in the database, so I created a new method to update the IsActive column to 0
-    public async Task<bool> DeleteDataFromClient<TP>(string tableName, TP parameters, string connectionId = "SQL")
+    public async Task<bool> DeleteDataFromClient(string tableName, string deteledId, string connectionId = "SQL")
     {
         try
         {
@@ -138,13 +145,13 @@ public class DataAccess : IDataAccess
             var primaryKeyColumnName = await GetPrimaryKey(tableName, connectionId);
 
             var deleteQuery =
-                $"UPDATE {tableName} SET Deleted = 1 WHERE {primaryKeyColumnName} = @{primaryKeyColumnName}";
-            await connection.ExecuteAsync(deleteQuery, parameters);
+                $"UPDATE {tableName} SET Deleted = 1 WHERE {primaryKeyColumnName} = '{deteledId}'";
+            await connection.ExecuteAsync(deleteQuery, new { });
             return true;
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error($"Delete data from table {tableName} error.");
+            Log.Error($"Delete data from table {tableName} error: {e.Message}");
             throw;
         }
     }

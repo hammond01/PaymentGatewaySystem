@@ -61,6 +61,7 @@ public class MerchantsController : ControllerBase
         }
         catch
         {
+            Log.Error(MessageConstantsWithValue.updateFail("Merchant", ""));
             return StatusCode(500, MessageConstants.InternalServerError);
         }
     }
@@ -80,11 +81,11 @@ public class MerchantsController : ControllerBase
     }
 
     [HttpDelete("delete-merchant")]
-    public async Task<IActionResult> DeleteMerchant(int id, DeleteMerchantModel deleteMerchant)
+    public async Task<IActionResult> DeleteMerchant(string deleteMerchant)
     {
         try
         {
-            var data = await _services.DeleteMerchant(id, deleteMerchant);
+            var data = await _services.DeleteMerchant(deleteMerchant);
             return Ok(data);
         }
         catch

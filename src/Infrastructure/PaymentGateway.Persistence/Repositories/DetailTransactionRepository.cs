@@ -24,7 +24,7 @@ public class DetailTransactionRepository : IDetailTransactionServices
         try
         {
             var detailTransactionModel = DetailTransaction.DetailTransactionGenerator(detailTransactionRequest);
-            var query = Extensions.GetInsertQuery("DetailTransaction", "DetailTransactionId",
+            var query = Extension.GetInsertQuery("DetailTransaction", "DetailTransactionId",
                 "DetailTransactionName",
                 "DetailTransactionIpAddress", "DetailTransactionCreateAt", "DetailTransactionUserId",
                 "PaymentTransactionId", "ReponseCodeId",

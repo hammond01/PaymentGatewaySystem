@@ -4,7 +4,6 @@ using PaymentGateway.Domain.Constants;
 using PaymentGateway.Domain.Entities;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
-using PaymentGateway.Ultils.Extension;
 using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
@@ -28,7 +27,7 @@ public class PaymentTransactionRepository : IPaymentTransactionService
     {
         try
         {
-            var query = Extensions.GetInsertQuery("PaymentTransaction", "PaymentTransactionId",
+            var query = Extension.GetInsertQuery("PaymentTransaction", "PaymentTransactionId",
                 "PaymentContent", "PaymentCurrency", "PaymentDate",
                 "ExpireDate", "PaymentLanguage", "MerchantId", "PaidAmount", "PaymentStatus", "PaymentLastMessage",
                 "PaymentCompletionTime", "Channel", "ClientName", "ReponseCodeId");
@@ -68,7 +67,7 @@ public class PaymentTransactionRepository : IPaymentTransactionService
                     };
                 }
 
-                Log.Error(MessageConstantsWithValue.createFail("detail transaction"));
+                Log.Error(MessageConstantsWithValue.createFail("detail transaction", ""));
                 return new BaseResultWithData<string>
                 {
                     IsSuccess = true,
@@ -78,12 +77,12 @@ public class PaymentTransactionRepository : IPaymentTransactionService
                 };
             }
 
-            Log.Error(MessageConstantsWithValue.createFail("payment transaction"));
+            Log.Error(MessageConstantsWithValue.createFail("payment transaction", ""));
 
             return new BaseResultWithData<string>
             {
                 IsSuccess = false,
-                Message = MessageConstantsWithValue.createFail("payment transaction"),
+                Message = MessageConstantsWithValue.createFail("payment transaction", ""),
                 Data = string.Empty,
                 StatusCode = StatusCodes.Status404NotFound
             };
@@ -99,7 +98,7 @@ public class PaymentTransactionRepository : IPaymentTransactionService
     {
         try
         {
-            var query = Extensions.GetUpdateQuery("PaymentTransaction", "PaymentTransactionId", "PaymentStatus",
+            var query = Extension.GetUpdateQuery("PaymentTransaction", "PaymentTransactionId", "PaymentStatus",
                 "PaymentLastMessage", "PaymentCompletionTime");
             var result = await _db.SaveData(query, paymentCompletion);
             if (result)
@@ -113,7 +112,7 @@ public class PaymentTransactionRepository : IPaymentTransactionService
                 };
             }
 
-            Log.Error(MessageConstantsWithValue.updateFail("payment transaction"));
+            Log.Error(MessageConstantsWithValue.updateFail("payment transaction", ""));
             return new BaseResult
             {
                 IsSuccess = false
@@ -153,11 +152,11 @@ public class PaymentTransactionRepository : IPaymentTransactionService
                     StatusCode = StatusCodes.Status200OK
                 };
             }
-            Log.Error(MessageConstantsWithValue.getDataFail("transaction status"));
+            Log.Error(MessageConstantsWithValue.getDataFail("transaction status", ""));
             return new BaseResultWithData<CheckTransactionStatus>
             {
                 IsSuccess = false,
-                Message = MessageConstantsWithValue.getDataFail("transaction status"),
+                Message = MessageConstantsWithValue.getDataFail("transaction status", ""),
                 StatusCode = StatusCodes.Status404NotFound
             };
         }

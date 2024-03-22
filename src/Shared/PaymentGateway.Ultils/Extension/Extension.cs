@@ -1,9 +1,11 @@
-﻿using System.Text.Json;
+﻿using IdGen;
+using System.Text.Json;
 
 namespace PaymentGateway.Ultils.Extension;
 
-public static class Extensions
+public static class Extension
 {
+    private static readonly IdGenerator _idGenerator = new IdGenerator(0);
     private static readonly JsonSerializerOptions serializerOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -29,16 +31,6 @@ public static class Extensions
         string query = @$"INSERT INTO {table}({key}) VALUES({value});";
         return query;
     }
-    public static string GetDeleteQueryInt(string table, string idColumn, int props)
-    {
-        string query = $"DELETE FROM {table} WHERE {idColumn} = {props};";
-        return query;
-    }
-    public static string GetDeleteQueryString(string table, string idColumn, string props)
-    {
-        string query = $"DELETE FROM {table} WHERE {idColumn} = '{props}';";
-        return query;
-    }
 
     public static string GetUpdateQuery(string table, string id, params string[] props)
     {
@@ -60,5 +52,9 @@ public static class Extensions
             chars[i] = (char)(_random.Next(0, 10) + '0');
         }
         return new string(chars);
+    }
+    public static string GenerateUniqueId()
+    {
+        return _idGenerator.CreateId().ToString();
     }
 }

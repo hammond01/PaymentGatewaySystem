@@ -1,4 +1,6 @@
-﻿namespace PaymentGateway.Domain.Entities;
+﻿using IdGen;
+
+namespace PaymentGateway.Domain.Entities;
 
 public class DetailTransaction
 {
@@ -13,9 +15,10 @@ public class DetailTransaction
 
     public static DetailTransaction DetailTransactionGenerator(CreateDetailTransaction request)
     {
+        var generator = new IdGenerator(0);
         var detailTransaction = new DetailTransaction
         {
-            DetailTransactionId = Guid.NewGuid().ToString(),
+            DetailTransactionId = generator.CreateId().ToString(),
             DetailTransactionName = request.DetailTransactionName,
             DetailTransactionIpAddress = request.DetailTransactionIpAddress,
             DetailTransactionCreateAt = DateTime.Now,

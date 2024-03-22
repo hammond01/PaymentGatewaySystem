@@ -107,7 +107,7 @@ public class VnPaySandBoxServices : IVNPaySandBoxServices
             {
                 IsSuccess = false,
                 Data = string.Empty,
-                Message = MessageConstantsWithValue.createFail("payment"),
+                Message = MessageConstantsWithValue.createFail("payment", ""),
                 StatusCode = StatusCodes.Status400BadRequest
             };
         }
@@ -163,8 +163,7 @@ public class VnPaySandBoxServices : IVNPaySandBoxServices
                     BankCode = createPaymentUrlResponse.BankCode
                 };
 
-                var createDetailTransactionResponse =
-                    await _detailTransactionServices.InsertDetailTransaction(createDetailTransactionModel);
+                await _detailTransactionServices.InsertDetailTransaction(createDetailTransactionModel);
                 var paymentCompletion = new PaymentCompletion
                 {
                     PaymentStatus = checkMessage.Message!,

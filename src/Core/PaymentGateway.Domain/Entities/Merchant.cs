@@ -19,6 +19,7 @@ public class CreateMerchantModel
 
 public class GetMerchantModel : BaseAuditableEntity
 {
+    public string? MerchantId { get; set; }
     public string? MerchantName { get; set; }
     public bool IsActive { get; set; }
 }

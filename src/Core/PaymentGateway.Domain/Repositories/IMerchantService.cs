@@ -9,5 +9,5 @@ public interface IMerchantService
     Task<BaseResultWithData<List<GetMerchantModel>>> GetMerchants();
     Task<BaseResult> UpdateNameMerchant(string merchantId, UpdateNameMerchantModel nameMerchant);
     Task<BaseResult> IsActiveMerchant(string merchantId, IsActiveMerchantModel activeMerchant);
-    Task<BaseResult> DeleteMerchant(int id, DeleteMerchantModel deleteMerchant);
+    Task<BaseResult> DeleteMerchant(string merchantId);
 }

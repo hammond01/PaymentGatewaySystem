@@ -5,6 +5,7 @@ using PaymentGateway.Domain.Constants;
 using PaymentGateway.Domain.Entities;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
+using PaymentGateway.Ultils.Extension;
 using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
@@ -18,7 +19,6 @@ public class MerchantRepository : IMerchantService
         _db = db;
     }
 
-
     /// <summary>
     ///     Creates a new merchant in the system.
     /// </summary>
@@ -31,7 +31,7 @@ public class MerchantRepository : IMerchantService
             // Create a new merchant entity
             var merchant = new Merchant
             {
-                MerchantId = "M" + Guid.NewGuid(),
+                MerchantId = Extension.GenerateUniqueId(),
                 CreatedAt = DateTime.Now,
                 MerchantName = createMerchant.MerchantName,
                 CreatedBy = createMerchant.CreatedBy,
@@ -54,11 +54,11 @@ public class MerchantRepository : IMerchantService
             }
 
             // Log the creation failure
-            Log.Error(MessageConstantsWithValue.createFail("merchant"));
+            Log.Error(MessageConstantsWithValue.createFail("merchant", ""));
             return new BaseResult
             {
                 IsSuccess = false,
-                Message = MessageConstantsWithValue.createFail("merchant"),
+                Message = MessageConstantsWithValue.createFail("merchant", ""),
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
@@ -70,6 +70,10 @@ public class MerchantRepository : IMerchantService
         }
     }
 
+    /// <summary>
+    ///     Returns a list of all merchants in the system.
+    /// </summary>
+    /// <returns>A <see /> containing a list of merchants, or an error message if the operation fails.</returns>
     public async Task<BaseResultWithData<List<GetMerchantModel>>> GetMerchants()
     {
         try
@@ -81,7 +85,7 @@ public class MerchantRepository : IMerchantService
                             CreatedBy,
                             CreatedAt,
                             LastUpdatedBy,
-                            LastUpdatedAt,
+                            LastUpdatedAt
                         FROM
                           Merchant WHERE Deleted = 0";
             var data = await _db.GetData<GetMerchantModel, dynamic>(query, new { });
@@ -98,11 +102,11 @@ public class MerchantRepository : IMerchantService
                 };
             }
 
-            Log.Error(MessageConstantsWithValue.getDataFail("all merchant"));
+            Log.Error(MessageConstantsWithValue.getDataFail("all merchant", ""));
             return new BaseResultWithData<List<GetMerchantModel>>
             {
                 IsSuccess = false,
-                Message = MessageConstantsWithValue.getDataFail("all merchant"),
+                Message = MessageConstantsWithValue.getDataFail("all merchant", ""),
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
@@ -113,10 +117,18 @@ public class MerchantRepository : IMerchantService
         }
     }
 
+    /// <summary>
+    ///     Updates the name of a merchant in the system.
+    /// </summary>
+    /// <param name="merchantId">The ID of the merchant to update.</param>
+    /// <param name="nameMerchant">The details of the merchant to update.</param>
+    /// <returns>A <see cref="BaseResult" /> indicating whether the operation was successful.</returns>
     public async Task<BaseResult> UpdateNameMerchant(string merchantId, UpdateNameMerchantModel nameMerchant)
     {
         try
         {
+            // Checks if a merchant with the specified merchant ID exists in the system.
+            // <returns><c>true</c> if a merchant with the specified ID exists, otherwise <c>false</c>.</returns>
             if (!await checkMerchantExist(merchantId))
                 return new BaseResult
                 {
@@ -143,11 +155,11 @@ public class MerchantRepository : IMerchantService
                 };
             }
 
-            Log.Error(MessageConstantsWithValue.updateFail("Merchant"));
+            Log.Error(MessageConstantsWithValue.updateFail("Merchant", ""));
             return new BaseResult
             {
                 IsSuccess = false,
-                Message = MessageConstantsWithValue.updateFail("Merchant"),
+                Message = MessageConstantsWithValue.updateFail("Merchant", ""),
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
@@ -158,10 +170,18 @@ public class MerchantRepository : IMerchantService
         }
     }
 
+    /// <summary>
+    ///     Updates the status of a merchant in the system.
+    /// </summary>
+    /// <param name="merchantId">The ID of the merchant to update.</param>
+    /// <param name="activeMerchant">The details of the merchant to update.</param>
+    /// <returns>A <see cref="BaseResult" /> indicating whether the operation was successful.</returns>
     public async Task<BaseResult> IsActiveMerchant(string merchantId, IsActiveMerchantModel activeMerchant)
     {
         try
         {
+            // Checks if a merchant with the specified merchant ID exists in the system.
+            // <returns><c>true</c> if a merchant with the specified ID exists, otherwise <c>false</c>.</returns>
             if (!await checkMerchantExist(merchantId))
                 return new BaseResult
                 {
@@ -189,11 +209,11 @@ public class MerchantRepository : IMerchantService
                 };
             }
 
-            Log.Error(MessageConstantsWithValue.updateFail("Merchant"));
+            Log.Error(MessageConstantsWithValue.updateFail("Merchant", ""));
             return new BaseResult
             {
                 IsSuccess = false,
-                Message = MessageConstantsWithValue.updateFail("Merchant"),
+                Message = MessageConstantsWithValue.updateFail("Merchant", ""),
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
@@ -204,27 +224,26 @@ public class MerchantRepository : IMerchantService
         }
     }
 
-    public async Task<BaseResult> DeleteMerchant(int id, DeleteMerchantModel activeMerchant)
+    /// <summary>
+    ///     Deletes a merchant from the system.
+    /// </summary>
+    /// <param name="merchantId">The ID of the merchant to be deleted.</param>
+    /// <returns>A <see cref="BaseResult" /> indicating whether the operation was successful.</returns>
+    public async Task<BaseResult> DeleteMerchant(string merchantId)
     {
         try
         {
-            if (!await checkMerchantExist(id))
+            // Checks if a merchant with the specified merchant ID exists in the system.
+            // <returns><c>true</c> if a merchant with the specified ID exists, otherwise <c>false</c>.</returns>
+            if (!await checkMerchantExist(merchantId))
                 return new BaseResult
                 {
                     IsSuccess = false,
                     Message = MessageConstantsWithValue.notFoundFromDatabase("merchant"),
                     StatusCode = StatusCodes.Status404NotFound
                 };
-            var query = @"UPDATE Merchant
-                          SET Deleted = 1,
-                              LastUpdatedBy = @LastUpdatedBy,
-                              LastUpdatedAt = @LastUpdatedAt
-                          WHERE Id = @Id";
+            var data = await _db.DeleteDataFromClient("Merchant", merchantId);
 
-            var LastUpdatedAt = DateTime.Now;
-
-            var data = await _db.SaveData(query,
-                new { Id = id, activeMerchant.LastUpdatedBy, LastUpdatedAt });
             if (data)
             {
                 Log.Information(MessageConstantsWithValue.deleteSuccess("Merchant"));
@@ -236,11 +255,11 @@ public class MerchantRepository : IMerchantService
                 };
             }
 
-            Log.Error(MessageConstantsWithValue.deleteFail("Merchant"));
+            Log.Error(MessageConstantsWithValue.deleteFail("Merchant", ""));
             return new BaseResult
             {
                 IsSuccess = false,
-                Message = MessageConstantsWithValue.deleteFail("Merchant"),
+                Message = MessageConstantsWithValue.deleteFail("Merchant", ""),
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
@@ -251,27 +270,25 @@ public class MerchantRepository : IMerchantService
         }
     }
 
+    /// <summary>
+    ///     Checks if a merchant with the specified merchant ID exists in the system.
+    /// </summary>
+    /// <param name="merchantId">The ID of the merchant to check.</param>
+    /// <returns><c>true</c> if a merchant with the specified ID exists, otherwise <c>false</c>.</returns>
     private async Task<bool> checkMerchantExist(string merchantId)
     {
+        // Define the SQL query to check for the merchant
         var query = @"SELECT
-                        COUNT(1)
-                      FROM
-                        Merchant
-                      WHERE
-                        MerchantId = @MerchantId";
-        var data = await _db.GetData<int, dynamic>(query, new { MerchantId = merchantId });
-        return data.FirstOrDefault() > 0;
-    }
+                    COUNT(1)
+                  FROM
+                    Merchant
+                  WHERE
+                    MerchantId = @MerchantId";
 
-    private async Task<bool> checkMerchantExist(int id)
-    {
-        var query = @"SELECT
-                        COUNT(1)
-                      FROM
-                        Merchant
-                      WHERE
-                        Id = @Id";
-        var data = await _db.GetData<int, dynamic>(query, new { Id = id });
+        // Execute the query and retrieve the data
+        var data = await _db.GetData<int, dynamic>(query, new { MerchantId = merchantId });
+
+        // Return whether the merchant exists or not
         return data.FirstOrDefault() > 0;
     }
 }
