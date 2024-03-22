@@ -2,20 +2,20 @@
 
 public class PaymentTransaction
 {
-    public string PaymentTransactionId { get; set; } = string.Empty;
-    public string PaymentContent { get; set; } = string.Empty;
-    public string PaymentCurrency { get; set; } = string.Empty;
+    public long PaymentTransactionId { get; set; }
+    public string? PaymentContent { get; set; }
+    public string? PaymentCurrency { get; set; }
     public DateTime? PaymentDate { get; set; }
     public DateTime? ExpireDate { get; set; }
-    public string? PaymentLanguage { get; set; } = string.Empty;
-    public string? MerchantId { get; set; } = string.Empty;
+    public string? PaymentLanguage { get; set; }
+    public long MerchantId { get; set; }
     public decimal? PaidAmount { get; set; }
-    public string? PaymentStatus { get; set; } = string.Empty;
-    public string? PaymentLastMessage { get; set; } = string.Empty;
-    public string? ReponseCodeId { get; set; } = string.Empty;
-    public string? PaymentCompletionTime { get; set; } = string.Empty;
-    public string? Channel { get; set; } = string.Empty;
-    public string? ClientName { get; set; } = string.Empty;
+    public string? PaymentStatus { get; set; }
+    public string? PaymentLastMessage { get; set; }
+    public long ReponseCodeId { get; set; }
+    public string? PaymentCompletionTime { get; set; }
+    public string? Channel { get; set; }
+    public string? ClientName { get; set; }
     public static PaymentTransaction GeneratePaymentTransaction(CreatePaymentTransactionModel request)
     {
         var paymentTransaction = new PaymentTransaction
@@ -41,52 +41,52 @@ public class PaymentTransaction
 //update payment transaction when payment is completed
 public class PaymentCompletion
 {
-    public string PaymentTransactionId { get; set; } = string.Empty;
-    public string PaymentStatus { get; set; } = string.Empty;
-    public string PaymentLastMessage { get; set; } = string.Empty;
-    public string PaymentCompletionTime { get; set; } = string.Empty;
+    public long PaymentTransactionId { get; set; }
+    public string? PaymentStatus { get; set; }
+    public string? PaymentLastMessage { get; set; }
+    public string? PaymentCompletionTime { get; set; }
 
 }
 public class CreatePaymentTransactionModel
 {
-    public string PaymentTransactionId { get; set; } = string.Empty;
-    public string PaymentContent { get; set; } = string.Empty;
-    public string PaymentCurrency { get; set; } = string.Empty;
+    public long PaymentTransactionId { get; set; }
+    public string? PaymentContent { get; set; }
+    public string? PaymentCurrency { get; set; }
     public decimal PaidAmount { get; set; }
-    public string? PaymentLanguage { get; set; } = string.Empty;
-    public string? MerchantId { get; set; } = string.Empty;
-    public string? PaymentStatus { get; set; } = string.Empty;
-    public string? IpAddress { get; set; } = string.Empty;
-    public string? PaymentLastMessage { get; set; } = string.Empty;
-    public string? PaymentCompletionTime { get; set; } = string.Empty;
-    public string? Channel { get; set; } = string.Empty;
-    public string? ClientName { get; set; } = string.Empty;
-    public string? ReponseCodeId { get; set; } = string.Empty;
+    public string? PaymentLanguage { get; set; }
+    public long MerchantId { get; set; }
+    public string? PaymentStatus { get; set; }
+    public string? IpAddress { get; set; }
+    public string? PaymentLastMessage { get; set; }
+    public string? PaymentCompletionTime { get; set; }
+    public string? Channel { get; set; }
+    public string? ClientName { get; set; }
+    public long ReponseCodeId { get; set; }
 }
 
 public class CheckTransactionStatus
 {
-    public string PaymentTransactionId { get; set; } = string.Empty;
-    public string PaymentContent { get; set; } = string.Empty;
-    public string MerchantName { get; set; } = string.Empty;
+    public long PaymentTransactionId { get; set; }
+    public string? PaymentContent { get; set; }
+    public string? MerchantName { get; set; }
     public decimal PaidAmount { get; set; }
-    public string PaymentStatus { get; set; } = string.Empty;
-    public string? PaymentCompletionTime { get; set; } = string.Empty;
+    public string? PaymentStatus { get; set; }
+    public string? PaymentCompletionTime { get; set; }
 }
 
 public class GetAllPaymentTransaction
 {
-    public string PaymentTransactionId { get; set; } = string.Empty;
-    public string PaymentContent { get; set; } = string.Empty;
-    public string PaymentCurrency { get; set; } = string.Empty;
+    public long PaymentTransactionId { get; set; }
+    public string? PaymentContent { get; set; }
+    public string? PaymentCurrency { get; set; }
     public DateTime? PaymentDate { get; set; }
     public DateTime? ExpireDate { get; set; }
-    public string? PaymentLanguage { get; set; } = string.Empty;
-    public string? MerchantName { get; set; } = string.Empty;
+    public string? PaymentLanguage { get; set; }
+    public string? MerchantName { get; set; }
     public decimal? PaidAmount { get; set; }
-    public string? PaymentStatus { get; set; } = string.Empty;
-    public string? PaymentLastMessage { get; set; } = string.Empty;
-    public string? PaymentCompletionTime { get; set; } = string.Empty;
-    public string? Channel { get; set; } = string.Empty;
-    public string? ClientName { get; set; } = string.Empty;
+    public string? PaymentStatus { get; set; }
+    public string? PaymentLastMessage { get; set; }
+    public string? PaymentCompletionTime { get; set; }
+    public string? Channel { get; set; }
+    public string? ClientName { get; set; }
 }

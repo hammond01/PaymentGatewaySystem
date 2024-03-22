@@ -123,7 +123,7 @@ public class MerchantRepository : IMerchantService
     /// <param name="merchantId">The ID of the merchant to update.</param>
     /// <param name="nameMerchant">The details of the merchant to update.</param>
     /// <returns>A <see cref="BaseResult" /> indicating whether the operation was successful.</returns>
-    public async Task<BaseResult> UpdateNameMerchant(string merchantId, UpdateNameMerchantModel nameMerchant)
+    public async Task<BaseResult> UpdateNameMerchant(long merchantId, UpdateNameMerchantModel nameMerchant)
     {
         try
         {
@@ -176,7 +176,7 @@ public class MerchantRepository : IMerchantService
     /// <param name="merchantId">The ID of the merchant to update.</param>
     /// <param name="activeMerchant">The details of the merchant to update.</param>
     /// <returns>A <see cref="BaseResult" /> indicating whether the operation was successful.</returns>
-    public async Task<BaseResult> IsActiveMerchant(string merchantId, IsActiveMerchantModel activeMerchant)
+    public async Task<BaseResult> IsActiveMerchant(long merchantId, IsActiveMerchantModel activeMerchant)
     {
         try
         {
@@ -229,7 +229,7 @@ public class MerchantRepository : IMerchantService
     /// </summary>
     /// <param name="merchantId">The ID of the merchant to be deleted.</param>
     /// <returns>A <see cref="BaseResult" /> indicating whether the operation was successful.</returns>
-    public async Task<BaseResult> DeleteMerchant(string merchantId)
+    public async Task<BaseResult> DeleteMerchant(long merchantId)
     {
         try
         {
@@ -275,7 +275,7 @@ public class MerchantRepository : IMerchantService
     /// </summary>
     /// <param name="merchantId">The ID of the merchant to check.</param>
     /// <returns><c>true</c> if a merchant with the specified ID exists, otherwise <c>false</c>.</returns>
-    private async Task<bool> checkMerchantExist(string merchantId)
+    private async Task<bool> checkMerchantExist(long merchantId)
     {
         // Define the SQL query to check for the merchant
         var query = @"SELECT

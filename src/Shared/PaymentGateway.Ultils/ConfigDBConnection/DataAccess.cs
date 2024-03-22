@@ -81,7 +81,7 @@ public class DataAccess : IDataAccess
         }
     }
 
-    public async Task<bool> UpdateData<TP>(string tableName, string updatedId, TP parameters, string connectionId = "SQL")
+    public async Task<bool> UpdateData<TP>(string tableName, long updatedId, TP parameters, string connectionId = "SQL")
     {
         try
         {
@@ -137,7 +137,7 @@ public class DataAccess : IDataAccess
     }
 
     //Delete on the interface still saves data in the database, so I created a new method to update the IsActive column to 0
-    public async Task<bool> DeleteDataFromClient(string tableName, string deteledId, string connectionId = "SQL")
+    public async Task<bool> DeleteDataFromClient(string tableName, long deteledId, string connectionId = "SQL")
     {
         try
         {
@@ -145,7 +145,7 @@ public class DataAccess : IDataAccess
             var primaryKeyColumnName = await GetPrimaryKey(tableName, connectionId);
 
             var deleteQuery =
-                $"UPDATE {tableName} SET Deleted = 1 WHERE {primaryKeyColumnName} = '{deteledId}'";
+                $"UPDATE {tableName} SET Deleted = 1 WHERE {primaryKeyColumnName} = {deteledId}";
             await connection.ExecuteAsync(deleteQuery, new { });
             return true;
         }

@@ -5,7 +5,7 @@ namespace PaymentGateway.Domain.Entities;
 public class Merchant : BaseAuditableEntity
 {
     public int Id { get; set; }
-    public string? MerchantId { get; set; }
+    public long MerchantId { get; set; }
     public string? MerchantName { get; set; }
     public bool IsActive { get; set; }
     public bool Deleted { get; set; }
@@ -19,7 +19,7 @@ public class CreateMerchantModel
 
 public class GetMerchantModel : BaseAuditableEntity
 {
-    public string? MerchantId { get; set; }
+    public long MerchantId { get; set; }
     public string? MerchantName { get; set; }
     public bool IsActive { get; set; }
 }

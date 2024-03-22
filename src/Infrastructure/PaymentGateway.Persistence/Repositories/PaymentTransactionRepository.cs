@@ -4,6 +4,7 @@ using PaymentGateway.Domain.Constants;
 using PaymentGateway.Domain.Entities;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
+using PaymentGateway.Ultils.Extension;
 using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
@@ -22,7 +23,7 @@ public class PaymentTransactionRepository : IPaymentTransactionService
         _transactionCodeService = transactionCodeService;
     }
 
-    public async Task<BaseResultWithData<string>> CreatePaymentTransactionAsync(
+    public async Task<BaseResultWithData<long>> CreatePaymentTransactionAsync(
         CreatePaymentTransactionModel paymentTransactionRequest)
     {
         try
@@ -46,9 +47,7 @@ public class PaymentTransactionRepository : IPaymentTransactionService
                     DetailTransactionIpAddress = paymentTransactionRequest.IpAddress!,
                     DetailTransactionUserId = "User Id example",
                     TransactionId = paymentTransactionModel.PaymentTransactionId,
-                    ReponseCodeId = paymentStatus
-                        .FirstOrDefault(x => x.ResponseCode!.Trim() == ResponseCodeConstants.AWAITING_PAYMENT)
-                        ?.ReponseCodeId!
+                    ReponseCodeId = paymentStatus.FirstOrDefault(x => x.ResponseCode!.Trim() == ResponseCodeConstants.AWAITING_PAYMENT)!.ReponseCodeId
                 };
 
                 var createDetailTransactionResponse =
@@ -58,7 +57,7 @@ public class PaymentTransactionRepository : IPaymentTransactionService
                 {
                     Log.Information(MessageConstantsWithValue.createSuccess("detail transaction"));
 
-                    return new BaseResultWithData<string>
+                    return new BaseResultWithData<long>
                     {
                         IsSuccess = true,
                         Data = paymentTransactionModel.PaymentTransactionId,
@@ -68,7 +67,7 @@ public class PaymentTransactionRepository : IPaymentTransactionService
                 }
 
                 Log.Error(MessageConstantsWithValue.createFail("detail transaction", ""));
-                return new BaseResultWithData<string>
+                return new BaseResultWithData<long>
                 {
                     IsSuccess = true,
                     Data = paymentTransactionModel.PaymentTransactionId,
@@ -79,11 +78,10 @@ public class PaymentTransactionRepository : IPaymentTransactionService
 
             Log.Error(MessageConstantsWithValue.createFail("payment transaction", ""));
 
-            return new BaseResultWithData<string>
+            return new BaseResultWithData<long>
             {
                 IsSuccess = false,
                 Message = MessageConstantsWithValue.createFail("payment transaction", ""),
-                Data = string.Empty,
                 StatusCode = StatusCodes.Status404NotFound
             };
         }

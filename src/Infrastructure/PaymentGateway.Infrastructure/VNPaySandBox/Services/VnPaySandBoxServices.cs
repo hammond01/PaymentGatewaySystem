@@ -35,7 +35,7 @@ public class VnPaySandBoxServices : IVNPaySandBoxServices
     {
         try
         {
-            var tick = DateTime.Now.Ticks.ToString();
+            var tick = DateTime.Now.Ticks;
             var vnPay = new VnPayLibrary();
             var createPaymentUrlModel = new CreatePaymentURLRequestTransfer
             {
@@ -68,7 +68,7 @@ public class VnPaySandBoxServices : IVNPaySandBoxServices
             vnPay.AddRequestData("vnp_IpAddr", createPaymentUrlModel.IpAddr);
             vnPay.AddRequestData("vnp_OrderInfo", createPaymentUrlModel.OrderInfo);
             vnPay.AddRequestData("vnp_OrderType", createPaymentUrlModel.OrderType);
-            vnPay.AddRequestData("vnp_TxnRef", createPaymentUrlModel.TxnRef);
+            vnPay.AddRequestData("vnp_TxnRef", createPaymentUrlModel.TxnRef.ToString());
             var paymentUrl = vnPay.CreateRequestUrl(_configuration["VNPaySanBox:BaseUrl"],
                 _configuration["VNPaySanBox:HashSecret"]);
 
@@ -139,7 +139,7 @@ public class VnPaySandBoxServices : IVNPaySandBoxServices
                 TransactionNo = vnPay.GetResponseData("vnp_TransactionNo"),
                 ResponseCode = vnPay.GetResponseData("vnp_ResponseCode"),
                 TransactionStatus = vnPay.GetResponseData("vnp_TransactionStatus"),
-                TxnRef = vnPay.GetResponseData("vnp_TxnRef"),
+                TxnRef = Convert.ToInt64(vnPay.GetResponseData("vnp_TxnRef")),
                 SecureHash = queryCollection.FirstOrDefault(p => p.Key == "vnp_SecureHash").Value!,
                 SecureHashType = vnPay.GetResponseData("vnp_SecureHashType")
             };
@@ -159,7 +159,7 @@ public class VnPaySandBoxServices : IVNPaySandBoxServices
                     DetailTransactionIpAddress = ipAddress,
                     DetailTransactionUserId = "User Id example line 150 file VNPaySanbox Service",
                     TransactionId = createPaymentUrlResponse.TxnRef,
-                    ReponseCodeId = checkMessage.ReponseCodeId!,
+                    ReponseCodeId = checkMessage.ReponseCodeId,
                     BankCode = createPaymentUrlResponse.BankCode
                 };
 

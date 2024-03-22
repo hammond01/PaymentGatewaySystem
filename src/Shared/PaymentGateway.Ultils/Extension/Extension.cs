@@ -53,8 +53,8 @@ public static class Extension
         }
         return new string(chars);
     }
-    public static string GenerateUniqueId()
+    public static long GenerateUniqueId()
     {
-        return _idGenerator.CreateId().ToString();
+        return _idGenerator.CreateId();
     }
 }

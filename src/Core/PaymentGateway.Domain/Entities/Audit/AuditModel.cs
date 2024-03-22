@@ -2,7 +2,7 @@
 #nullable disable
 public class AuditModel
 {
-    public string AuditLogId { get; set; }
+    public long AuditLogId { get; set; }
     public string UserId { get; set; }
     public string Action { get; set; }
     public string ControllerName { get; set; }

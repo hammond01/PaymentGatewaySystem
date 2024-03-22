@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using IdGen;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PaymentGateway.Application.Features.Merchants.Queries;
 using PaymentGateway.Domain.Entities;
@@ -29,10 +30,11 @@ namespace PaymentGateway.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Post()
         {
+            var generator = new IdGenerator(5);
             var merchant = new Merchant
             {
                 Id = 0,
-                MerchantId = "M" + Guid.NewGuid(),
+                MerchantId = generator.CreateId(),
                 CreatedAt = DateTime.Now,
                 MerchantName = "createMerchant.MerchantName",
                 CreatedBy = "createMerchant.CreatedBy",
@@ -43,7 +45,7 @@ namespace PaymentGateway.API.Controllers
             return Ok(result);
         }
         [HttpPut("/{MerchantId}")]
-        public async Task<IActionResult> Update(string MerchantId)
+        public async Task<IActionResult> Update(long MerchantId)
         {
             var merchant = new UpdateNameMerchantModel()
             {

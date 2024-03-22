@@ -7,7 +7,7 @@ public interface IMerchantService
 {
     Task<BaseResult> CreateMerchant(CreateMerchantModel createMerchant);
     Task<BaseResultWithData<List<GetMerchantModel>>> GetMerchants();
-    Task<BaseResult> UpdateNameMerchant(string merchantId, UpdateNameMerchantModel nameMerchant);
-    Task<BaseResult> IsActiveMerchant(string merchantId, IsActiveMerchantModel activeMerchant);
-    Task<BaseResult> DeleteMerchant(string merchantId);
+    Task<BaseResult> UpdateNameMerchant(long merchantId, UpdateNameMerchantModel nameMerchant);
+    Task<BaseResult> IsActiveMerchant(long merchantId, IsActiveMerchantModel activeMerchant);
+    Task<BaseResult> DeleteMerchant(long merchantId);
 }

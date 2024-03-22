@@ -21,7 +21,7 @@ public class AuditRepository : IAuditServices
         {
             var auditModel = new AuditModel
             {
-                AuditLogId = Guid.NewGuid().ToString(),
+                AuditLogId = Extension.GenerateUniqueId(),
                 CreatedAt = DateTime.Now.ToString("dd/MM/yyyy"),
                 UserId = auditRequest.UserId,
                 Action = auditRequest.Action,

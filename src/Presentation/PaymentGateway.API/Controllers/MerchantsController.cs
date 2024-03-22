@@ -52,7 +52,7 @@ public class MerchantsController : ControllerBase
     }
 
     [HttpPut("update-name-merchant-name")]
-    public async Task<IActionResult> UpdateNameMerchant(string merchantId, UpdateNameMerchantModel nameMerchant)
+    public async Task<IActionResult> UpdateNameMerchant(long merchantId, UpdateNameMerchantModel nameMerchant)
     {
         try
         {
@@ -67,7 +67,7 @@ public class MerchantsController : ControllerBase
     }
 
     [HttpPut("is-active-merchant")]
-    public async Task<IActionResult> IsActiveMerchant(string merchantId, IsActiveMerchantModel activeMerchant)
+    public async Task<IActionResult> IsActiveMerchant(long merchantId, IsActiveMerchantModel activeMerchant)
     {
         try
         {
@@ -81,7 +81,7 @@ public class MerchantsController : ControllerBase
     }
 
     [HttpDelete("delete-merchant")]
-    public async Task<IActionResult> DeleteMerchant(string deleteMerchant)
+    public async Task<IActionResult> DeleteMerchant(long deleteMerchant)
     {
         try
         {
