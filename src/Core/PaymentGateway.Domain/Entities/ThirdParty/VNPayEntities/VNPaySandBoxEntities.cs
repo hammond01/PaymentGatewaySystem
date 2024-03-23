@@ -19,7 +19,7 @@ public class VNPaySandBoxEntities
     public string? BankTranNo { get; set; }
     public string? PayDate { get; set; }
     public string? CardType { get; set; }
-    public string? TransactionNo { get; set; }
+    public long TransactionNo { get; set; }
     public string? ResponseCode { get; set; }
     public string? TransactionStatus { get; set; }
     public string? SecureHashType { get; set; }
@@ -53,14 +53,12 @@ public class CreateStringUrlResponse
     public string? CardType { get; set; }
     public string? PayDate { get; set; }
     public string? OrderInfo { get; set; }
-    public string? TransactionNo { get; set; }
+    public long TransactionNo { get; set; }
     public string? ResponseCode { get; set; }
     public string? TransactionStatus { get; set; }
     public long TxnRef { get; set; }
     public string? SecureHashType { get; set; }
     public string? SecureHash { get; set; }
-
-
 }
 public class CreateStringUrlRequest
 {

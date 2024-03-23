@@ -17,11 +17,11 @@ public class DetailPaymentRepository : IDetailPaymentService
         _db = db;
     }
 
-    public async Task<BaseResult> CreateDataToDetailPaymentAsync(CreateStringUrlResponse createStringUrlResponse)
+    public async Task<BaseResult> CreateDataToDetailPaymentAsync(DetailPaymentVNPSandBox request)
     {
         try
         {
-            var result = await _db.InsertData("DetailPayment", createStringUrlResponse);
+            var result = await _db.InsertData("DetailPayment", request);
             return new BaseResult
             {
                 IsSuccess = result,

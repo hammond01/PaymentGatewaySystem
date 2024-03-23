@@ -5,5 +5,5 @@ namespace PaymentGateway.Domain.Repositories;
 
 public interface IDetailPaymentService
 {
-    Task<BaseResult> CreateDataToDetailPaymentAsync(CreateStringUrlResponse createStringUrlResponse);
+    Task<BaseResult> CreateDataToDetailPaymentAsync(DetailPaymentVNPSandBox createStringUrlResponse);
 }
