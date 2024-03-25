@@ -2,6 +2,7 @@
 using PaymentGateway.Domain.Common.ResponseBase;
 using PaymentGateway.Domain.Constants;
 using PaymentGateway.Domain.Entities;
+using PaymentGateway.Domain.Exceptions.ErrorMessage;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using PaymentGateway.Ultils.Extension;
@@ -85,9 +86,9 @@ public class PaymentTransactionRepository : IPaymentTransactionService
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error(MessageConstants.InternalServerError);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }
@@ -116,27 +117,28 @@ public class PaymentTransactionRepository : IPaymentTransactionService
                 IsSuccess = false
             };
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error(MessageConstants.InternalServerError);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }
 
-    public async Task<BaseResultWithData<CheckTransactionStatus>> CheckTransactionStatus(string transactionId)
+    public async Task<BaseResultWithData<CheckTransactionStatus>> CheckTransactionStatus(string transactionNo)
     {
         try
         {
-            var query = @"SELECT p.PaymentTransactionId,
-                               p.PaymentContent,
+            var query = @"SELECT dp.TransactionNo,
+                               pt.PaymentContent,
+                               pt.PaymentCompletionTime,
                                m.MerchantName,
-                               p.PaidAmount,
-                               p.PaymentStatus,
-                               p.PaymentCompletionTime
-                        FROM PaymentTransaction p
-                        LEFT JOIN Merchant m ON p.MerchantId = m.MerchantId
-                        WHERE p.PaymentTransactionId = @transactionId";
-            var result = await _db.GetData<CheckTransactionStatus, dynamic>(query, new { transactionId });
+                               pt.PaidAmount,
+                               pt.PaymentStatus
+                        FROM DetailPayment dp
+                        LEFT JOIN PaymentTransaction pt ON dp.PaymentTransactionId = pt.PaymentTransactionId
+                        LEFT JOIN Merchant m ON pt.MerchantId = m.MerchantId
+                        WHERE dp.TransactionNo = @transactionNo";
+            var result = await _db.GetData<CheckTransactionStatus, dynamic>(query, new { transactionNo });
 
             var checkTransactionStatusEnumerable = result as List<CheckTransactionStatus> ?? result.ToList();
             if (checkTransactionStatusEnumerable.Any())
@@ -158,9 +160,9 @@ public class PaymentTransactionRepository : IPaymentTransactionService
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error(MessageConstants.InternalServerError);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }

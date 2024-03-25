@@ -56,6 +56,7 @@ builder.Services.AddScoped<IAuditServices, AuditRepository>();
 builder.Services.AddScoped<IPaymentTransactionService, PaymentTransactionRepository>();
 builder.Services.AddScoped<ITransactionCodeService, TransactionCodeRepository>();
 builder.Services.AddScoped<IDetailTransactionServices, DetailTransactionRepository>();
+builder.Services.AddScoped<IDetailPaymentService, DetailPaymentRepository>();
 
 //add mediatR
 builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromAssemblies(typeof(Program).Assembly));

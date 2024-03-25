@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using PaymentGateway.Domain.Common.ResponseBase;
 using PaymentGateway.Domain.Entities;
+using PaymentGateway.Domain.Exceptions.ErrorMessage;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using PaymentGateway.Ultils.Extension;
@@ -49,9 +50,10 @@ public class DetailTransactionRepository : IDetailTransactionServices
                 StatusCode = StatusCodes.Status500InternalServerError
             };
         }
-        catch
+        catch (Exception e)
         {
-            throw new Exception("Internal server error!");
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
+            throw;
         }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using PaymentGateway.Domain.Common.ResponseBase;
 using PaymentGateway.Domain.Constants;
 using PaymentGateway.Domain.Entities;
+using PaymentGateway.Domain.Exceptions.ErrorMessage;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using PaymentGateway.Ultils.Extension;
@@ -62,10 +63,9 @@ public class MerchantRepository : IMerchantService
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
-        catch
+        catch (Exception e)
         {
-            // Log the internal server error
-            Log.Error(MessageConstants.InternalServerError);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }
@@ -110,9 +110,9 @@ public class MerchantRepository : IMerchantService
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error(MessageConstants.InternalServerError);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }
@@ -163,9 +163,9 @@ public class MerchantRepository : IMerchantService
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error(MessageConstants.InternalServerError);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }
@@ -217,9 +217,9 @@ public class MerchantRepository : IMerchantService
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error(MessageConstants.InternalServerError);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }
@@ -263,9 +263,9 @@ public class MerchantRepository : IMerchantService
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error(MessageConstants.InternalServerError);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }

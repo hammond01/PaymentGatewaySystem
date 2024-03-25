@@ -66,7 +66,7 @@ public class CreatePaymentTransactionModel
 
 public class CheckTransactionStatus
 {
-    public long PaymentTransactionId { get; set; }
+    public long TransactionNo { get; set; }
     public string? PaymentContent { get; set; }
     public string? MerchantName { get; set; }
     public decimal PaidAmount { get; set; }

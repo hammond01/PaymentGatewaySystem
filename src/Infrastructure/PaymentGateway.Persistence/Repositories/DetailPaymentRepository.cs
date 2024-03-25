@@ -2,6 +2,7 @@
 using PaymentGateway.Domain.Common.ResponseBase;
 using PaymentGateway.Domain.Constants;
 using PaymentGateway.Domain.Entities.ThirdParty.VNPayEntities;
+using PaymentGateway.Domain.Exceptions.ErrorMessage;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using Serilog;
@@ -29,9 +30,9 @@ public class DetailPaymentRepository : IDetailPaymentService
                 Message = MessageConstantsWithValue.createSuccess("detail payment")
             };
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error(MessageConstantsWithValue.createFail("detail payment", ""));
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }
