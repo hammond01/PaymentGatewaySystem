@@ -26,6 +26,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentGateway.Ultils", "src\Shared\PaymentGateway.Ultils\PaymentGateway.Ultils.csproj", "{587B763B-2403-4691-A4AB-9F6BC3E37EE9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{38F219C1-061F-48FE-B463-CFD53321E9CD}"
+	ProjectSection(SolutionItems) = preProject
+		src\Infrastructure\PaymentGateway.Persistence\Repositories\MerchantRepository.cs = src\Infrastructure\PaymentGateway.Persistence\Repositories\MerchantRepository.cs
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentUI", "src\Presentation\UI\PaymentUI\PaymentUI.csproj", "{D1BC62B7-1208-4263-A21F-A43EE008C94A}"
 EndProject

@@ -81,7 +81,7 @@ public class RefundRequest
     public string? TxnRef { get; set; }
     public long Amount { get; set; }
     public string? OrderInfo { get; set; }
-    public string? TransactionNo { get; set; }
+    public long TransactionNo { get; set; }
     public string? TransactionDate { get; set; }
     public string? CreateBy { get; set; }
     public string? CreateDate { get; set; }
@@ -91,12 +91,17 @@ public class RefundRequest
 
 public class RefundRequestClient
 {
-    public string? TxnRef { get; set; }
     public string? Amount { get; set; }
-    public string? TransactionDate { get; set; }
-    public string? TransactionType { get; set; }
     public string? CreateBy { get; set; }
-    public string? TransactionNo { get; set; }
+    public long TransactionNo { get; set; }
+    public string? TransactionType { get; set; }
+}
+
+public class RefundRequestInfo
+{
+    public string? TxnRef { get; set; }
+    public string? OrderInfo { get; set; } = "Gửi yêu cầu hoàn tiền giao dịch VNPay";
+    public string? PayDate { get; set; }
 }
 public class RefundResponse
 {

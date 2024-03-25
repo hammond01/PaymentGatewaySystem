@@ -67,12 +67,12 @@ public class PaymentController : PaymentGatewayVNPayVersion
         }
     }
 
-    [HttpGet("check-transaction-status-with-sandbox/{transactionId}")]
-    public async Task<IActionResult> CheckTransactionStatus(string transactionId)
+    [HttpGet("check-transaction-status-with-sandbox/{transactionNo}")]
+    public async Task<IActionResult> CheckTransactionStatus(string transactionNo)
     {
         try
         {
-            var response = await _paymentTransactionService.CheckTransactionStatus(transactionId);
+            var response = await _paymentTransactionService.CheckTransactionStatus(transactionNo);
             return Ok(response);
         }
         catch

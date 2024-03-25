@@ -6,4 +6,5 @@ namespace PaymentGateway.Domain.Repositories;
 public interface IDetailPaymentService
 {
     Task<BaseResult> CreateDataToDetailPaymentAsync(DetailPaymentVNPSandBox createStringUrlResponse);
+    Task<BaseResultWithData<RefundRequestInfo>> GetTransactionInfoForRefundRequest(long transactionNO);
 }

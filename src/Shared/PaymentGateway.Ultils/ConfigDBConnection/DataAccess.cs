@@ -29,7 +29,7 @@ public class DataAccess : IDataAccess
         }
         catch (Exception e)
         {
-            _logger.LogError($"Save database error: {e.Message}");
+            _logger.LogError($"Get data from database error: {e.Message}");
             throw;
         }
     }

@@ -36,4 +36,25 @@ public class DetailPaymentRepository : IDetailPaymentService
             throw;
         }
     }
+
+    public async Task<BaseResultWithData<RefundRequestInfo>> GetTransactionInfoForRefundRequest(long transactionNo)
+    {
+        try
+        {
+            var query = $@"SELECT TxnRef, PayDate FROM DetailPayment WHERE TransactionNo =  @TransactionNo";
+            var result = await _db.GetData<RefundRequestInfo, dynamic>(query, new { transactionNo });
+            return new BaseResultWithData<RefundRequestInfo>
+            {
+                IsSuccess = true,
+                StatusCode = StatusCodes.Status200OK,
+                Message = MessageConstantsWithValue.getDataSuccess("transaction info"),
+                Data = result.FirstOrDefault()
+            };
+        }
+        catch (Exception e)
+        {
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
+            throw;
+        }
+    }
 }
