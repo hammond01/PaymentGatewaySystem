@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using PaymentGateway.Domain.Common.ResponseBase;
 using PaymentGateway.Domain.Entities;
+using PaymentGateway.Domain.Exceptions.ErrorMessage;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using PaymentGateway.Ultils.Extension;
@@ -8,12 +9,12 @@ using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
 
-public class DetailTransactionServices : IDetailTransactionServices
+public class DetailTransactionRepository : IDetailTransactionServices
 {
     private readonly IDataAccess _db;
     private readonly ILogger _logger;
 
-    public DetailTransactionServices(IDataAccess db, ILogger logger)
+    public DetailTransactionRepository(IDataAccess db, ILogger logger)
     {
         _db = db;
         _logger = logger;
@@ -24,7 +25,7 @@ public class DetailTransactionServices : IDetailTransactionServices
         try
         {
             var detailTransactionModel = DetailTransaction.DetailTransactionGenerator(detailTransactionRequest);
-            var query = Extensions.GetInsertQuery("DetailTransaction", "DetailTransactionId",
+            var query = Extension.GetInsertQuery("DetailTransaction", "DetailTransactionId",
                 "DetailTransactionName",
                 "DetailTransactionIpAddress", "DetailTransactionCreateAt", "DetailTransactionUserId",
                 "PaymentTransactionId", "ReponseCodeId",
@@ -49,9 +50,10 @@ public class DetailTransactionServices : IDetailTransactionServices
                 StatusCode = StatusCodes.Status500InternalServerError
             };
         }
-        catch
+        catch (Exception e)
         {
-            throw new Exception("Internal server error!");
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
+            throw;
         }
     }
 }

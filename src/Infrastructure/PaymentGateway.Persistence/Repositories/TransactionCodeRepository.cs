@@ -1,17 +1,18 @@
 ﻿using Dapper;
 using PaymentGateway.Domain.Entities;
+using PaymentGateway.Domain.Exceptions.ErrorMessage;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
 
-public class TransactionCodeService : ITransactionCodeService
+public class TransactionCodeRepository : ITransactionCodeService
 {
     private readonly IDataAccess _db;
     private readonly ILogger _logger;
 
-    public TransactionCodeService(IDataAccess db, ILogger logger)
+    public TransactionCodeRepository(IDataAccess db, ILogger logger)
     {
         _db = db;
         _logger = logger;
@@ -35,8 +36,8 @@ public class TransactionCodeService : ITransactionCodeService
         }
         catch (Exception e)
         {
-            _logger.Information("Internal server error.");
-            throw new Exception(e.Message);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
+            throw;
         }
     }
 
@@ -58,7 +59,7 @@ public class TransactionCodeService : ITransactionCodeService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }

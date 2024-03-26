@@ -12,10 +12,10 @@ namespace PaymentGateway.API.Controllers;
 [ApiController]
 public class MerchantsController : ControllerBase
 {
-    private readonly IMerchantServices _services;
+    private readonly IMerchantService _services;
     private readonly IMediator _sender;
 
-    public MerchantsController(IMerchantServices services, IMediator sender)
+    public MerchantsController(IMerchantService services, IMediator sender)
     {
         _services = services;
         _sender = sender;
@@ -52,7 +52,7 @@ public class MerchantsController : ControllerBase
     }
 
     [HttpPut("update-name-merchant-name")]
-    public async Task<IActionResult> UpdateNameMerchant(string merchantId, UpdateNameMerchantModel nameMerchant)
+    public async Task<IActionResult> UpdateNameMerchant(long merchantId, UpdateNameMerchantModel nameMerchant)
     {
         try
         {
@@ -61,16 +61,31 @@ public class MerchantsController : ControllerBase
         }
         catch
         {
+            Log.Error(MessageConstantsWithValue.updateFail("Merchant", ""));
             return StatusCode(500, MessageConstants.InternalServerError);
         }
     }
 
     [HttpPut("is-active-merchant")]
-    public async Task<IActionResult> IsActiveMerchant(string merchantId, IsActiveMerchantModel activeMerchant)
+    public async Task<IActionResult> IsActiveMerchant(long merchantId, IsActiveMerchantModel activeMerchant)
     {
         try
         {
             var data = await _services.IsActiveMerchant(merchantId, activeMerchant);
+            return Ok(data);
+        }
+        catch
+        {
+            return StatusCode(500, MessageConstants.InternalServerError);
+        }
+    }
+
+    [HttpDelete("delete-merchant")]
+    public async Task<IActionResult> DeleteMerchant(long deleteMerchant)
+    {
+        try
+        {
+            var data = await _services.DeleteMerchant(deleteMerchant);
             return Ok(data);
         }
         catch

@@ -89,4 +89,5 @@ public class Helpers
     {
         return @$"{refundRequest.RequestId} | {refundRequest.Version} | {refundRequest.Command} | {refundRequest.TmnCode} | {refundRequest.TransactionType} | {refundRequest.TxnRef} | {refundRequest.Amount} | {refundRequest.TransactionNo} | {refundRequest.TransactionDate} | {refundRequest.CreateBy} | {refundRequest.CreateDate} | {refundRequest.IpAddr} | {refundRequest.OrderInfo}";
     }
+
 }

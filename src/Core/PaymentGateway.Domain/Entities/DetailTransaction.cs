@@ -1,21 +1,24 @@
-﻿namespace PaymentGateway.Domain.Entities;
+﻿using IdGen;
+
+namespace PaymentGateway.Domain.Entities;
 
 public class DetailTransaction
 {
-    public string DetailTransactionId { get; set; } = string.Empty;
-    public string DetailTransactionName { get; set; } = string.Empty;
-    public string DetailTransactionIpAddress { get; set; } = string.Empty;
-    public DateTime DetailTransactionCreateAt { get; set; } = DateTime.Now;
-    public string DetailTransactionUserId { get; set; } = string.Empty;
-    public string PaymentTransactionId { get; set; } = string.Empty;
-    public string ReponseCodeId { get; set; } = string.Empty;
-    public string BankCode { get; set; } = string.Empty;
+    public long DetailTransactionId { get; set; }
+    public string? DetailTransactionName { get; set; }
+    public string? DetailTransactionIpAddress { get; set; }
+    public DateTime DetailTransactionCreateAt { get; set; }
+    public string? DetailTransactionUserId { get; set; }
+    public long PaymentTransactionId { get; set; }
+    public long ReponseCodeId { get; set; }
+    public string? BankCode { get; set; }
 
     public static DetailTransaction DetailTransactionGenerator(CreateDetailTransaction request)
     {
+        var generator = new IdGenerator(0);
         var detailTransaction = new DetailTransaction
         {
-            DetailTransactionId = Guid.NewGuid().ToString(),
+            DetailTransactionId = generator.CreateId(),
             DetailTransactionName = request.DetailTransactionName,
             DetailTransactionIpAddress = request.DetailTransactionIpAddress,
             DetailTransactionCreateAt = DateTime.Now,
@@ -29,10 +32,10 @@ public class DetailTransaction
 }
 public class CreateDetailTransaction
 {
-    public string DetailTransactionName { get; set; } = string.Empty;
-    public string DetailTransactionIpAddress { get; set; } = string.Empty;
-    public string DetailTransactionUserId { get; set; } = string.Empty;
-    public string TransactionId { get; set; } = string.Empty;
-    public string ReponseCodeId { get; set; } = string.Empty;
-    public string BankCode { get; set; } = string.Empty;
+    public string? DetailTransactionName { get; set; }
+    public string? DetailTransactionIpAddress { get; set; }
+    public string? DetailTransactionUserId { get; set; }
+    public long TransactionId { get; set; }
+    public long ReponseCodeId { get; set; }
+    public string? BankCode { get; set; }
 }

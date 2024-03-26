@@ -2,6 +2,7 @@
 using PaymentGateway.Domain.Common.ResponseBase;
 using PaymentGateway.Domain.Constants;
 using PaymentGateway.Domain.Entities;
+using PaymentGateway.Domain.Exceptions.ErrorMessage;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using PaymentGateway.Ultils.Extension;
@@ -9,13 +10,13 @@ using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
 
-public class PaymentTransactionService : IPaymentTransactionService
+public class PaymentTransactionRepository : IPaymentTransactionService
 {
     private readonly IDataAccess _db;
     private readonly IDetailTransactionServices _detailTransactionServices;
     private readonly ITransactionCodeService _transactionCodeService;
 
-    public PaymentTransactionService(IDataAccess db, IDetailTransactionServices detailTransactionServices,
+    public PaymentTransactionRepository(IDataAccess db, IDetailTransactionServices detailTransactionServices,
         ITransactionCodeService transactionCodeService)
     {
         _db = db;
@@ -23,15 +24,15 @@ public class PaymentTransactionService : IPaymentTransactionService
         _transactionCodeService = transactionCodeService;
     }
 
-    public async Task<BaseResultWithData<string>> CreatePaymentTransactionAsync(
+    public async Task<BaseResultWithData<long>> CreatePaymentTransactionAsync(
         CreatePaymentTransactionModel paymentTransactionRequest)
     {
         try
         {
-            var query = Extensions.GetInsertQuery("PaymentTransaction", "PaymentTransactionId",
+            var query = Extension.GetInsertQuery("PaymentTransaction", "PaymentTransactionId",
                 "PaymentContent", "PaymentCurrency", "PaymentDate",
                 "ExpireDate", "PaymentLanguage", "MerchantId", "PaidAmount", "PaymentStatus", "PaymentLastMessage",
-                "PaymentCompletionTime");
+                "PaymentCompletionTime", "Channel", "ClientName", "ReponseCodeId");
             var paymentTransactionModel = PaymentTransaction.GeneratePaymentTransaction(paymentTransactionRequest);
             var result = await _db.SaveData(query, paymentTransactionModel);
             if (result)
@@ -47,9 +48,7 @@ public class PaymentTransactionService : IPaymentTransactionService
                     DetailTransactionIpAddress = paymentTransactionRequest.IpAddress!,
                     DetailTransactionUserId = "User Id example",
                     TransactionId = paymentTransactionModel.PaymentTransactionId,
-                    ReponseCodeId = paymentStatus
-                        .FirstOrDefault(x => x.ResponseCode!.Trim() == ResponseCodeConstants.AWAITING_PAYMENT)
-                        ?.ReponseCodeId!
+                    ReponseCodeId = paymentStatus.FirstOrDefault(x => x.ResponseCode!.Trim() == ResponseCodeConstants.AWAITING_PAYMENT)!.ReponseCodeId
                 };
 
                 var createDetailTransactionResponse =
@@ -59,7 +58,7 @@ public class PaymentTransactionService : IPaymentTransactionService
                 {
                     Log.Information(MessageConstantsWithValue.createSuccess("detail transaction"));
 
-                    return new BaseResultWithData<string>
+                    return new BaseResultWithData<long>
                     {
                         IsSuccess = true,
                         Data = paymentTransactionModel.PaymentTransactionId,
@@ -68,8 +67,8 @@ public class PaymentTransactionService : IPaymentTransactionService
                     };
                 }
 
-                Log.Error(MessageConstantsWithValue.createFail("detail transaction"));
-                return new BaseResultWithData<string>
+                Log.Error(MessageConstantsWithValue.createFail("detail transaction", ""));
+                return new BaseResultWithData<long>
                 {
                     IsSuccess = true,
                     Data = paymentTransactionModel.PaymentTransactionId,
@@ -78,19 +77,18 @@ public class PaymentTransactionService : IPaymentTransactionService
                 };
             }
 
-            Log.Error(MessageConstantsWithValue.createFail("payment transaction"));
+            Log.Error(MessageConstantsWithValue.createFail("payment transaction", ""));
 
-            return new BaseResultWithData<string>
+            return new BaseResultWithData<long>
             {
                 IsSuccess = false,
-                Message = MessageConstantsWithValue.createFail("payment transaction"),
-                Data = string.Empty,
+                Message = MessageConstantsWithValue.createFail("payment transaction", ""),
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error(MessageConstants.InternalServerError);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }
@@ -99,7 +97,7 @@ public class PaymentTransactionService : IPaymentTransactionService
     {
         try
         {
-            var query = Extensions.GetUpdateQuery("PaymentTransaction", "PaymentTransactionId", "PaymentStatus",
+            var query = Extension.GetUpdateQuery("PaymentTransaction", "PaymentTransactionId", "PaymentStatus",
                 "PaymentLastMessage", "PaymentCompletionTime");
             var result = await _db.SaveData(query, paymentCompletion);
             if (result)
@@ -113,33 +111,34 @@ public class PaymentTransactionService : IPaymentTransactionService
                 };
             }
 
-            Log.Error(MessageConstantsWithValue.updateFail("payment transaction"));
+            Log.Error(MessageConstantsWithValue.updateFail("payment transaction", ""));
             return new BaseResult
             {
                 IsSuccess = false
             };
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error(MessageConstants.InternalServerError);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }
 
-    public async Task<BaseResultWithData<CheckTransactionStatus>> CheckTransactionStatus(string transactionId)
+    public async Task<BaseResultWithData<CheckTransactionStatus>> CheckTransactionStatus(string transactionNo)
     {
         try
         {
-            var query = @"SELECT p.PaymentTransactionId,
-                               p.PaymentContent,
+            var query = @"SELECT dp.TransactionNo,
+                               pt.PaymentContent,
+                               pt.PaymentCompletionTime,
                                m.MerchantName,
-                               p.PaidAmount,
-                               p.PaymentStatus,
-                               p.PaymentCompletionTime
-                        FROM PaymentTransaction p
-                        LEFT JOIN Merchant m ON p.MerchantId = m.MerchantId
-                        WHERE p.PaymentTransactionId = @transactionId";
-            var result = await _db.GetData<CheckTransactionStatus, dynamic>(query, new { transactionId })!;
+                               pt.PaidAmount,
+                               pt.PaymentStatus
+                        FROM DetailPayment dp
+                        LEFT JOIN PaymentTransaction pt ON dp.PaymentTransactionId = pt.PaymentTransactionId
+                        LEFT JOIN Merchant m ON pt.MerchantId = m.MerchantId
+                        WHERE dp.TransactionNo = @transactionNo";
+            var result = await _db.GetData<CheckTransactionStatus, dynamic>(query, new { transactionNo });
 
             var checkTransactionStatusEnumerable = result as List<CheckTransactionStatus> ?? result.ToList();
             if (checkTransactionStatusEnumerable.Any())
@@ -153,17 +152,17 @@ public class PaymentTransactionService : IPaymentTransactionService
                     StatusCode = StatusCodes.Status200OK
                 };
             }
-            Log.Error(MessageConstantsWithValue.getDataFail("transaction status"));
+            Log.Error(MessageConstantsWithValue.getDataFail("transaction status", ""));
             return new BaseResultWithData<CheckTransactionStatus>
             {
                 IsSuccess = false,
-                Message = MessageConstantsWithValue.getDataFail("transaction status"),
+                Message = MessageConstantsWithValue.getDataFail("transaction status", ""),
                 StatusCode = StatusCodes.Status404NotFound
             };
         }
-        catch
+        catch (Exception e)
         {
-            Log.Error(MessageConstants.InternalServerError);
+            Log.Error(LayerErrorMessage.ERROR_AT_PERSISTENCE(e.Message));
             throw;
         }
     }

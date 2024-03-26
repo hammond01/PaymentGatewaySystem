@@ -7,7 +7,7 @@ using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Domain.Repositories.VNPayRestful;
 using PaymentGateway.Domain.Repositories.VNPaySandBox;
 using PaymentGateway.Infrastructure.Repositories;
-using PaymentGateway.Infrastructure.VNPaySandBox.Services;
+using PaymentGateway.Infrastructure.VNPaySandBox.Repository;
 using PaymentGateway.Persistence.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
@@ -50,18 +50,28 @@ builder.Services.AddSingleton<Helpers>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<IDataAccess, DataAccess>();
 builder.Services.AddScoped<IVnPayServices, VnPayServices>();
-builder.Services.AddScoped<IVNPaySandBoxServices, VnPaySandBoxServices>();
-builder.Services.AddScoped<IMerchantServices, MerchantServices>();
-builder.Services.AddScoped<IAuditServices, AuditServices>();
-builder.Services.AddScoped<IPaymentTransactionService, PaymentTransactionService>();
-builder.Services.AddScoped<ITransactionCodeService, TransactionCodeService>();
-builder.Services.AddScoped<IDetailTransactionServices, DetailTransactionServices>();
+builder.Services.AddScoped<IVNPaySandBoxServices, VnPaySandBoxRepository>();
+builder.Services.AddScoped<IMerchantService, MerchantRepository>();
+builder.Services.AddScoped<IAuditServices, AuditRepository>();
+builder.Services.AddScoped<IPaymentTransactionService, PaymentTransactionRepository>();
+builder.Services.AddScoped<ITransactionCodeService, TransactionCodeRepository>();
+builder.Services.AddScoped<IDetailTransactionServices, DetailTransactionRepository>();
+builder.Services.AddScoped<IDetailPaymentService, DetailPaymentRepository>();
 
 //add mediatR
 builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromAssemblies(typeof(Program).Assembly));
 
 builder.Services.AddTransient<IRequestHandler<GetAllMerchantsQuery, BaseResultWithData<List<GetMerchantModel>>>, GetAllMerchantsHandler>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -76,6 +86,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseSerilogRequestLogging();
+
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 

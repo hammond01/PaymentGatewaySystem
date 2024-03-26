@@ -6,11 +6,11 @@ using PaymentGateway.Ultils.Extension;
 
 namespace PaymentGateway.Persistence.Repositories;
 
-public class AuditServices : IAuditServices
+public class AuditRepository : IAuditServices
 {
     private readonly IDataAccess _db;
 
-    public AuditServices(IDataAccess db)
+    public AuditRepository(IDataAccess db)
     {
         _db = db;
     }
@@ -21,7 +21,7 @@ public class AuditServices : IAuditServices
         {
             var auditModel = new AuditModel
             {
-                AuditLogId = Guid.NewGuid().ToString(),
+                AuditLogId = Extension.GenerateUniqueId(),
                 CreatedAt = DateTime.Now.ToString("dd/MM/yyyy"),
                 UserId = auditRequest.UserId,
                 Action = auditRequest.Action,
@@ -30,7 +30,7 @@ public class AuditServices : IAuditServices
                 ControllerName = auditRequest.ControllerName,
                 PaymentStatus = auditRequest.PaymentStatus
             };
-            var query = Extensions.GetInsertQuery("Audit", "AuditLogId", "UserId", "Action", "CreatedAt",
+            var query = Extension.GetInsertQuery("Audit", "AuditLogId", "UserId", "Action", "CreatedAt",
                 "ActionStatus", "ActionIp", "ControllerName", "PaymentStatus");
             _db.SaveData(query, auditModel);
         }

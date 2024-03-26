@@ -8,9 +8,9 @@ namespace PaymentGateway.Application.Features.Merchants.Handlers;
 
 public class GetAllMerchantsHandler : IRequestHandler<GetAllMerchantsQuery, BaseResultWithData<List<GetMerchantModel>>>
 {
-    private readonly IMerchantServices _services;
+    private readonly IMerchantService _services;
 
-    public GetAllMerchantsHandler(IMerchantServices services)
+    public GetAllMerchantsHandler(IMerchantService services)
     {
         _services = services;
     }
