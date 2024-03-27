@@ -1,4 +1,8 @@
-﻿namespace PaymentGateway.Domain.Entities.ThirdParty.VNPayEntities;
+﻿using System.ComponentModel.DataAnnotations;
+
+// ReSharper disable All
+
+namespace PaymentGateway.Domain.Entities.ThirdParty.VNPayEntities;
 
 public class VNPaySandBoxEntities
 {
@@ -60,9 +64,11 @@ public class CreateStringUrlResponse
     public string? SecureHashType { get; set; }
     public string? SecureHash { get; set; }
 }
+
 public class CreateStringUrlRequest
 {
-    public int OrderId { get; set; }
+    [Required]
+    public long OrderId { get; set; }
     public string? PaymentContent { get; set; }
     public decimal Amount { get; set; }
     public long MerchantId { get; set; }
@@ -91,10 +97,8 @@ public class RefundRequest
 
 public class RefundRequestClient
 {
-    public string? Amount { get; set; }
     public string? CreateBy { get; set; }
     public long TransactionNo { get; set; }
-    public string? TransactionType { get; set; }
 }
 
 public class RefundRequestInfo
@@ -103,6 +107,7 @@ public class RefundRequestInfo
     public string? OrderInfo { get; set; } = "Gửi yêu cầu hoàn tiền giao dịch VNPay";
     public string? PayDate { get; set; }
 }
+
 public class RefundResponse
 {
     public string? ResponseId { get; set; }
@@ -119,5 +124,4 @@ public class RefundResponse
     public string? TransactionType { get; set; }
     public string? TransactionStatus { get; set; }
     public string? SecureHash { get; set; }
-
 }

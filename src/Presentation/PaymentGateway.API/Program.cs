@@ -9,6 +9,7 @@ using PaymentGateway.Domain.Repositories.VNPaySandBox;
 using PaymentGateway.Infrastructure.Repositories;
 using PaymentGateway.Infrastructure.VNPaySandBox.Repository;
 using PaymentGateway.Persistence.Repositories;
+using PaymentGateway.Ultils.CommonServices;
 using PaymentGateway.Ultils.ConfigDBConnection;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using PaymentGateway.Ultils.Extension;
@@ -17,24 +18,21 @@ using Serilog;
 using Serilog.Formatting.Json;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Host.UseSerilog((_, config) =>
-{
+builder.Host.UseSerilog((_, config) => {
     config.WriteTo.Console().MinimumLevel.Information();
     config.WriteTo.File(
-        path: "Log/Logger.txt",
-        rollingInterval: RollingInterval.Day,
-        rollOnFileSizeLimit: true,
-        formatter: new JsonFormatter()).MinimumLevel.Information();
+    path: "Log/Logger.txt",
+    rollingInterval: RollingInterval.Day,
+    rollOnFileSizeLimit: true,
+    formatter: new JsonFormatter()).MinimumLevel.Information();
 });
 builder.Services.AddControllers(options => { options.Filters.Add<LoggingActionFilter>(); })
-    .ConfigureApiBehaviorOptions(options =>
-    {
+    .ConfigureApiBehaviorOptions(options => {
         // Loại bỏ log của ModelStateInvalidFilter
         options.SuppressModelStateInvalidFilter = true;
     });
 //Register ILogger and LoggerFactory
-builder.Services.AddLogging(loggingBuilder =>
-{
+builder.Services.AddLogging(loggingBuilder => {
     loggingBuilder.ClearProviders();
     loggingBuilder.AddConsole();
     loggingBuilder.AddDebug();
@@ -47,10 +45,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Helpers>();
+builder.Services.AddSingleton<UserIdService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<IDataAccess, DataAccess>();
 builder.Services.AddScoped<IVnPayServices, VnPayServices>();
-builder.Services.AddScoped<IVNPaySandBoxServices, VnPaySandBoxRepository>();
+builder.Services.AddScoped<IVnPaySandBoxServices, VnPaySandBoxRepository>();
 builder.Services.AddScoped<IMerchantService, MerchantRepository>();
 builder.Services.AddScoped<IAuditServices, AuditRepository>();
 builder.Services.AddScoped<IPaymentTransactionService, PaymentTransactionRepository>();
@@ -63,11 +62,9 @@ builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromA
 
 builder.Services.AddTransient<IRequestHandler<GetAllMerchantsQuery, BaseResultWithData<List<GetMerchantModel>>>, GetAllMerchantsHandler>();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", builder =>
-    {
-        builder.AllowAnyOrigin()
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowAll", configurePolicy: corsPolicyBuilder => {
+        corsPolicyBuilder.AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader();
     });

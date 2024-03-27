@@ -12,16 +12,16 @@ namespace PaymentGateway.API.Controllers;
 
 public class PaymentController : PaymentGatewayVNPayVersion
 {
-    private readonly IVnPayServices _vnPayServices;
-    private readonly IVNPaySandBoxServices _services;
     private readonly IPaymentTransactionService _paymentTransactionService;
-
-    public PaymentController(IVnPayServices vnPayServices, IVNPaySandBoxServices services, IPaymentTransactionService paymentTransactionService)
+    private readonly IVnPaySandBoxServices _services;
+    private readonly IVnPayServices _vnPayServices;
+    public PaymentController(IVnPayServices vnPayServices, IVnPaySandBoxServices services, IPaymentTransactionService paymentTransactionService)
     {
         _vnPayServices = vnPayServices;
         _services = services;
         _paymentTransactionService = paymentTransactionService;
     }
+
     [HttpPost("create-qr-code-string")]
     public async Task<IActionResult> CreateQrCode(CreateQrRequest createQrRequest)
     {
@@ -39,11 +39,12 @@ public class PaymentController : PaymentGatewayVNPayVersion
         }
     }
 
-    [HttpPost("create-payment-url-with-sandbox")]
-    public async Task<IActionResult> CreatePaymentUrl(CreateStringUrlRequest request)
+    [HttpPost("create-payment-url-using-sandbox")]
+    public async Task<IActionResult> CreatePaymentUrl([FromBody] CreatePaymentSandboxRequest request)
     {
         try
         {
+            if (!ModelState.IsValid) return BadRequest();
             var res = await _services.CreatePaymentUrl(HttpContext, request);
             return Ok(res);
         }
@@ -68,7 +69,7 @@ public class PaymentController : PaymentGatewayVNPayVersion
     }
 
     [HttpGet("check-transaction-status-with-sandbox/{transactionNo}")]
-    public async Task<IActionResult> CheckTransactionStatus(string transactionNo)
+    public async Task<IActionResult> CheckTransactionStatus(long transactionNo)
     {
         try
         {

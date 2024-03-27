@@ -28,7 +28,7 @@ public class DetailTransactionRepository : IDetailTransactionServices
             var query = Extension.GetInsertQuery("DetailTransaction", "DetailTransactionId",
                 "DetailTransactionName",
                 "DetailTransactionIpAddress", "DetailTransactionCreateAt", "DetailTransactionUserId",
-                "PaymentTransactionId", "ReponseCodeId",
+                "PaymentTransactionId", "ResponseCodeId",
                 "BankCode");
             var save = await _db.SaveData(query, detailTransactionModel);
             if (save)

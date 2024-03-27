@@ -22,7 +22,7 @@ public class TransactionCodeRepository : ITransactionCodeService
     {
         try
         {
-            var query = @"SELECT rc.ReponseCodeId,
+            var query = @"SELECT rc.ResponseCodeId,
                                rc.ResponseCode,
                                rc.Message,
                                rc.RequestTypeId,
@@ -45,7 +45,7 @@ public class TransactionCodeRepository : ITransactionCodeService
     {
         try
         {
-            var query = @"SELECT rc.ReponseCodeId,
+            var query = @"SELECT rc.ResponseCodeId,
                                rc.ResponseCode,
                                rc.Message,
                                rc.RequestTypeId,

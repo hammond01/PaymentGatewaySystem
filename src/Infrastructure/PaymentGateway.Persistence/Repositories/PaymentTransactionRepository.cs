@@ -5,7 +5,6 @@ using PaymentGateway.Domain.Entities;
 using PaymentGateway.Domain.Exceptions.ErrorMessage;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
-using PaymentGateway.Ultils.Extension;
 using Serilog;
 
 namespace PaymentGateway.Persistence.Repositories;
@@ -29,26 +28,22 @@ public class PaymentTransactionRepository : IPaymentTransactionService
     {
         try
         {
-            var query = Extension.GetInsertQuery("PaymentTransaction", "PaymentTransactionId",
-                "PaymentContent", "PaymentCurrency", "PaymentDate",
-                "ExpireDate", "PaymentLanguage", "MerchantId", "PaidAmount", "PaymentStatus", "PaymentLastMessage",
-                "PaymentCompletionTime", "Channel", "ClientName", "ReponseCodeId");
             var paymentTransactionModel = PaymentTransaction.GeneratePaymentTransaction(paymentTransactionRequest);
-            var result = await _db.SaveData(query, paymentTransactionModel);
+            var result = await _db.InsertData("PaymentTransaction", paymentTransactionModel);
             if (result)
             {
                 Log.Information(MessageConstantsWithValue.createSuccess("payment transaction"));
                 //create detail transaction
                 var paymentStatus =
                     await _transactionCodeService.GetTransactionCodeByTypeAsync(RequestTypeTransactionConstants
-                        .COMMON_TRANSACTION);
+                                                                                    .COMMON_TRANSACTION);
                 var detailTransactionRequest = new CreateDetailTransaction
                 {
                     DetailTransactionName = "Create new payment transaction",
                     DetailTransactionIpAddress = paymentTransactionRequest.IpAddress!,
-                    DetailTransactionUserId = "User Id example",
+                    DetailTransactionUserId = paymentTransactionRequest.UserId!,
                     TransactionId = paymentTransactionModel.PaymentTransactionId,
-                    ReponseCodeId = paymentStatus.FirstOrDefault(x => x.ResponseCode!.Trim() == ResponseCodeConstants.AWAITING_PAYMENT)!.ReponseCodeId
+                    ResponseCodeId = paymentStatus.FirstOrDefault(x => x.ResponseCode!.Trim() == ResponseCodeConstants.AWAITING_PAYMENT)!.ResponseCodeId
                 };
 
                 var createDetailTransactionResponse =
@@ -93,13 +88,11 @@ public class PaymentTransactionRepository : IPaymentTransactionService
         }
     }
 
-    public async Task<BaseResult> UpdatePaymentTransactionAsync(PaymentCompletion paymentCompletion)
+    public async Task<BaseResult> UpdatePaymentTransactionAsync(long updatedId, PaymentCompletion paymentCompletion)
     {
         try
         {
-            var query = Extension.GetUpdateQuery("PaymentTransaction", "PaymentTransactionId", "PaymentStatus",
-                "PaymentLastMessage", "PaymentCompletionTime");
-            var result = await _db.SaveData(query, paymentCompletion);
+            var result = await _db.UpdateData("PaymentTransaction", updatedId, paymentCompletion);
             if (result)
             {
                 Log.Information(MessageConstantsWithValue.updateSuccess("payment transaction"));
@@ -124,7 +117,7 @@ public class PaymentTransactionRepository : IPaymentTransactionService
         }
     }
 
-    public async Task<BaseResultWithData<CheckTransactionStatus>> CheckTransactionStatus(string transactionNo)
+    public async Task<BaseResultWithData<CheckTransactionStatus>> CheckTransactionStatus(long transactionNo)
     {
         try
         {
@@ -156,7 +149,7 @@ public class PaymentTransactionRepository : IPaymentTransactionService
             return new BaseResultWithData<CheckTransactionStatus>
             {
                 IsSuccess = false,
-                Message = MessageConstantsWithValue.getDataFail("transaction status", ""),
+                Message = $"No transaction exists with transaction code: {transactionNo}",
                 StatusCode = StatusCodes.Status404NotFound
             };
         }

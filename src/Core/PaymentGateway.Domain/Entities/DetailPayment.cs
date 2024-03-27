@@ -9,7 +9,7 @@ public class DetailPayment
     public string? BankCode { get; set; }
     public string? TmnCoBankTranNode { get; set; }
     public string? CardType { get; set; }
-    public string? PayDate { get; set; } //yyyyMMddHHmmss
+    public string? PayDate { get; set; }//yyyyMMddHHmmss
     public string? OrderInfo { get; set; }
     public string? TransactionNo { get; set; }
     public string? ResponseCode { get; set; }
@@ -22,5 +22,5 @@ public class DetailPayment
     public string? UserFeeAmount { get; set; }
     public string? DiscountAmount { get; set; }
     public string? JsonData { get; set; }
-    public string? StringQR { get; set; }
+    public string? StringQr { get; set; }
 }

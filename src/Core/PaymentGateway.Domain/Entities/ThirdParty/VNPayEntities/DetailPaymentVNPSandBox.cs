@@ -9,10 +9,11 @@ public class DetailPaymentVNPSandBox
     public long Amount { get; set; }
     public string? BankCode { get; set; }
     public string? CardType { get; set; }
-    public string? PayDate { get; set; } //yyyyMMddHHmmss
+    public string? PayDate { get; set; }//yyyyMMddHHmmss
     public string? OrderInfo { get; set; }
     public long TransactionNo { get; set; }
     public string? ResponseCode { get; set; }
+    public long ResponseCodeId { get; set; }
     public string? TransactionStatus { get; set; }
     public long TxnRef { get; set; }
     public string? SecureHashType { get; set; }

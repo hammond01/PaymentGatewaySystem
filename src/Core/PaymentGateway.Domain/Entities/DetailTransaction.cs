@@ -10,7 +10,7 @@ public class DetailTransaction
     public DateTime DetailTransactionCreateAt { get; set; }
     public string? DetailTransactionUserId { get; set; }
     public long PaymentTransactionId { get; set; }
-    public long ReponseCodeId { get; set; }
+    public long ResponseCodeId { get; set; }
     public string? BankCode { get; set; }
 
     public static DetailTransaction DetailTransactionGenerator(CreateDetailTransaction request)
@@ -24,7 +24,7 @@ public class DetailTransaction
             DetailTransactionCreateAt = DateTime.Now,
             DetailTransactionUserId = request.DetailTransactionUserId,
             PaymentTransactionId = request.TransactionId,
-            ReponseCodeId = request.ReponseCodeId,
+            ResponseCodeId = request.ResponseCodeId,
             BankCode = request.BankCode
         };
         return detailTransaction;
@@ -36,6 +36,6 @@ public class CreateDetailTransaction
     public string? DetailTransactionIpAddress { get; set; }
     public string? DetailTransactionUserId { get; set; }
     public long TransactionId { get; set; }
-    public long ReponseCodeId { get; set; }
+    public long ResponseCodeId { get; set; }
     public string? BankCode { get; set; }
 }

@@ -3,7 +3,7 @@
 //in database, this class is a table responseCode
 public class TransactionCode
 {
-    public long ReponseCodeId { get; set; }
+    public long ResponseCodeId { get; set; }
     public string? RequestTypeId { get; set; }
     public string? ResponseCode { get; set; }
     public string? Message { get; set; }

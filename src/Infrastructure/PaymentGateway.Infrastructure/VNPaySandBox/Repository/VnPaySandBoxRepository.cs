@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Globalization;
+using System.Text;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using PaymentGateway.Domain.Common.ResponseBase;
@@ -8,29 +11,28 @@ using PaymentGateway.Domain.Entities.ThirdParty.VNPayEntities;
 using PaymentGateway.Domain.Exceptions.ErrorMessage;
 using PaymentGateway.Domain.Repositories;
 using PaymentGateway.Domain.Repositories.VNPaySandBox;
+using PaymentGateway.Domain.Request;
 using PaymentGateway.Infrastructure.VNPaySandBox.Lib;
+using PaymentGateway.Ultils.CommonServices;
 using PaymentGateway.Ultils.ConfigDBConnection.Impl;
 using PaymentGateway.Ultils.Extension;
 using Serilog;
-using System.Globalization;
-using System.Text;
-using System.Text.Json;
 
 namespace PaymentGateway.Infrastructure.VNPaySandBox.Repository;
 
-public class VnPaySandBoxRepository : IVNPaySandBoxServices
+public class VnPaySandBoxRepository : IVnPaySandBoxServices
 {
     private readonly IConfiguration _configuration;
+    private readonly IDataAccess _db;
+    private readonly IDetailPaymentService _detailPaymentService;
+    private readonly IDetailTransactionServices _detailTransactionServices;
     private readonly IPaymentTransactionService _paymentTransactionService;
     private readonly ITransactionCodeService _transactionCodeService;
-    private readonly IDetailTransactionServices _detailTransactionServices;
-    private readonly IDetailPaymentService _detailPaymentService;
-    private readonly IDataAccess _db;
-    //private readonly HttpClient _client;
+    private readonly UserIdService _userIdService;
 
     public VnPaySandBoxRepository(IConfiguration configuration, IPaymentTransactionService paymentTransactionService,
         ITransactionCodeService transactionCodeService, IDetailTransactionServices detailTransactionServices,
-        IDetailPaymentService detailPaymentService, IDataAccess db)
+        IDetailPaymentService detailPaymentService, IDataAccess db, UserIdService userIdService)
     {
         _configuration = configuration;
         _paymentTransactionService = paymentTransactionService;
@@ -38,14 +40,14 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
         _detailTransactionServices = detailTransactionServices;
         _detailPaymentService = detailPaymentService;
         _db = db;
-        //_client = client;
+        _userIdService = userIdService;
     }
-
     public async Task<BaseResultWithData<string>> CreatePaymentUrl(HttpContext context,
-        CreateStringUrlRequest urlString)
+        CreatePaymentSandboxRequest urlString)
     {
         try
         {
+            _userIdService.UserId = urlString.UserId!;
             var tick = Extension.GenerateUniqueId();
             var vnPay = new VnPayLibrary();
             var createPaymentUrlModel = new CreatePaymentURLRequestTransfer
@@ -60,12 +62,42 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
                 CreateDate = DateTime.Now.ToString("yyyyMMddHHmmss"),
                 IpAddr = Utils.GetIpAddress(context),
                 OrderInfo = "Thanh toán cho đơn hàng: " + urlString.OrderId,
-                OrderType = "other", //default value: other
+                OrderType = "other",//default value: other
                 TxnRef = tick,
                 BaseUrl = _configuration["VNPaySanBox:BaseUrl"]!,
                 HashSecret = _configuration["VNPaySanBox:HashSecret"]!
             };
 
+            var checkMessage =
+                await _transactionCodeService.GetTransactionCodeByCodeAsync(ResponseCodeConstants.AWAITING_PAYMENT,
+                                                                            RequestTypeTransactionConstants.COMMON_TRANSACTION);
+            //Customer create Payment
+            var createPayment = new CreatePaymentTransactionModel
+            {
+                PaymentTransactionId = tick,
+                PaymentContent = urlString.PaymentContent,
+                PaymentCurrency = createPaymentUrlModel.CurrCode,
+                PaidAmount = urlString.Amount,
+                PaymentLanguage = createPaymentUrlModel.Locale.ToUpper(),
+                MerchantId = urlString.MerchantId,
+                PaymentStatus = checkMessage.Message,
+                IpAddress = createPaymentUrlModel.IpAddr,
+                ResponseCodeId = checkMessage.ResponseCodeId,
+                Channel = urlString.Channel,
+                ClientName = urlString.ClientName,
+                PaymentLastMessage = urlString.LastMessage,
+                UserId = urlString.UserId!
+            };
+            //add paymnet transaction to database
+            var createPaymentAsync = await _paymentTransactionService.CreatePaymentTransactionAsync(createPayment);
+            if (!createPaymentAsync.IsSuccess)
+                return new BaseResultWithData<string>
+                {
+                    IsSuccess = false,
+                    Data = string.Empty,
+                    Message = MessageConstantsWithValue.createFail("payment", ""),
+                    StatusCode = StatusCodes.Status400BadRequest
+                };
             #region AddRequestData
 
             vnPay.AddRequestData("vnp_Version", createPaymentUrlModel.Version);
@@ -81,46 +113,15 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
             vnPay.AddRequestData("vnp_OrderType", createPaymentUrlModel.OrderType);
             vnPay.AddRequestData("vnp_TxnRef", createPaymentUrlModel.TxnRef.ToString());
             var paymentUrl = vnPay.CreateRequestUrl(_configuration["VNPaySanBox:BaseUrl"],
-                _configuration["VNPaySanBox:HashSecret"]);
+                                                    _configuration["VNPaySanBox:HashSecret"]);
 
             #endregion
-
-            var checkMessage =
-                await _transactionCodeService.GetTransactionCodeByCodeAsync(ResponseCodeConstants.AWAITING_PAYMENT,
-                    RequestTypeTransactionConstants.COMMON_TRANSACTION);
-            //Customer create Payment
-            var createPayment = new CreatePaymentTransactionModel
-            {
-                PaymentTransactionId = tick,
-                PaymentContent = urlString.PaymentContent,
-                PaymentCurrency = createPaymentUrlModel.CurrCode,
-                PaidAmount = urlString.Amount,
-                PaymentLanguage = createPaymentUrlModel.Locale.ToUpper(),
-                MerchantId = urlString.MerchantId,
-                PaymentStatus = checkMessage.Message,
-                IpAddress = createPaymentUrlModel.IpAddr,
-                ReponseCodeId = checkMessage.ReponseCodeId,
-                Channel = urlString.Channel,
-                ClientName = urlString.ClientName,
-                PaymentLastMessage = urlString.LastMessage
-            };
-            //add paymnet transaction to database
-            var createPaymentAsync = await _paymentTransactionService.CreatePaymentTransactionAsync(createPayment);
-
-            if (createPaymentAsync.IsSuccess)
-                return new BaseResultWithData<string>
-                {
-                    IsSuccess = true,
-                    Data = paymentUrl,
-                    Message = MessageConstantsWithValue.createSuccess("payment"),
-                    StatusCode = StatusCodes.Status201Created
-                };
             return new BaseResultWithData<string>
             {
-                IsSuccess = false,
-                Data = string.Empty,
-                Message = MessageConstantsWithValue.createFail("payment", ""),
-                StatusCode = StatusCodes.Status400BadRequest
+                IsSuccess = true,
+                Data = paymentUrl,
+                Message = MessageConstantsWithValue.createSuccess("payment"),
+                StatusCode = StatusCodes.Status201Created
             };
         }
         catch (Exception e)
@@ -158,9 +159,9 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
             var ipAddress = Utils.GetIpAddress(context);
             var checkMessage =
                 await _transactionCodeService.GetTransactionCodeByCodeAsync(createPaymentUrlResponse.ResponseCode,
-                    RequestTypeTransactionConstants.RETURN_URL);
+                                                                            RequestTypeTransactionConstants.RETURN_URL);
             var checkSignature = vnPay.ValidateSignature(createPaymentUrlResponse.SecureHash,
-                _configuration["VNPaySanBox:HashSecret"]);
+                                                         _configuration["VNPaySanBox:HashSecret"]);
             if (checkSignature)
             {
                 Log.Information("Valid signature");
@@ -169,47 +170,63 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
                 {
                     DetailTransactionName = "Processing payment transactions",
                     DetailTransactionIpAddress = ipAddress,
-                    DetailTransactionUserId = "User Id example line 150 file VNPaySanbox Service",
+                    DetailTransactionUserId = _userIdService.UserId,
                     TransactionId = createPaymentUrlResponse.TxnRef,
-                    ReponseCodeId = checkMessage.ReponseCodeId,
+                    ResponseCodeId = checkMessage.ResponseCodeId,
                     BankCode = createPaymentUrlResponse.BankCode
                 };
-
                 await _detailTransactionServices.InsertDetailTransaction(createDetailTransactionModel);
+                var paymentTransactionId = createPaymentUrlResponse.TxnRef;
                 var paymentCompletion = new PaymentCompletion
                 {
                     PaymentStatus = checkMessage.Message!,
                     PaymentLastMessage = "None",
-                    PaymentTransactionId = createPaymentUrlResponse.TxnRef,
                     PaymentCompletionTime = DateTime
                         .ParseExact(createPaymentUrlResponse.PayDate, "yyyyMMddHHmmss",
-                            CultureInfo.InvariantCulture)
-                        .ToString("MM/dd/yyyy HH:mm:ss")
+                                    CultureInfo.InvariantCulture)
+                        .ToString("MM/dd/yyyy HH:mm:ss"),
+                    ResponseCodeId = checkMessage.ResponseCodeId
                 };
-                await _paymentTransactionService.UpdatePaymentTransactionAsync(paymentCompletion);
-                if (!await CheckTransactionNo(createPaymentUrlResponse.TransactionNo))
-                {
-                    var createDetailPaymentSandbox = new DetailPaymentVNPSandBox
+                await _paymentTransactionService.UpdatePaymentTransactionAsync(paymentTransactionId, paymentCompletion);
+                if (await CheckTransactionNo(createPaymentUrlResponse.TransactionNo))
+                    return new BaseResultWithData<object>
                     {
-                        DetailPaymentId = Extension.GenerateUniqueId(),
-                        PaymentTransactionId = createPaymentUrlResponse.TxnRef,
-                        TmnCode = createPaymentUrlResponse.TmnCode,
-                        Amount = createPaymentUrlResponse.Amount,
-                        BankCode = createPaymentUrlResponse.BankCode,
-                        BankTranNo = createPaymentUrlResponse.BankTranNo,
-                        CardType = createPaymentUrlResponse.CardType,
-                        PayDate = createPaymentUrlResponse.PayDate,
-                        OrderInfo = createPaymentUrlResponse.OrderInfo,
-                        TransactionNo = createPaymentUrlResponse.TransactionNo,
-                        ResponseCode = createPaymentUrlResponse.ResponseCode,
-                        TransactionStatus = createPaymentUrlResponse.TransactionStatus,
-                        TxnRef = createPaymentUrlResponse.TxnRef,
-                        SecureHashType = createPaymentUrlResponse.SecureHashType,
-                        SecureHash = createPaymentUrlResponse.SecureHash,
-                        JsonData = JsonConvert.SerializeObject(createPaymentUrlResponse)
+                        Data = new
+                        {
+                            createPaymentUrlResponse.TransactionNo,
+                            createPaymentUrlResponse.TransactionStatus,
+                            PaymentCompletion = DateTime
+                                .ParseExact(createPaymentUrlResponse.PayDate, "yyyyMMddHHmmss",
+                                            CultureInfo.InvariantCulture)
+                                .ToString("MM/dd/yyyy HH:mm:ss")
+                        },
+                        IsSuccess = createPaymentUrlResponse.ResponseCode == "00",
+                        Message = checkMessage.Message,
+                        StatusCode = createPaymentUrlResponse.ResponseCode == "00"
+                            ? StatusCodes.Status200OK
+                            : StatusCodes.Status400BadRequest
                     };
-                    await _detailPaymentService.CreateDataToDetailPaymentAsync(createDetailPaymentSandbox);
-                }
+                var createDetailPaymentSandbox = new DetailPaymentVNPSandBox
+                {
+                    DetailPaymentId = Extension.GenerateUniqueId(),
+                    PaymentTransactionId = createPaymentUrlResponse.TxnRef,
+                    TmnCode = createPaymentUrlResponse.TmnCode,
+                    Amount = createPaymentUrlResponse.Amount,
+                    BankCode = createPaymentUrlResponse.BankCode,
+                    BankTranNo = createPaymentUrlResponse.BankTranNo,
+                    CardType = createPaymentUrlResponse.CardType,
+                    PayDate = createPaymentUrlResponse.PayDate,
+                    OrderInfo = createPaymentUrlResponse.OrderInfo,
+                    TransactionNo = createPaymentUrlResponse.TransactionNo,
+                    ResponseCode = createPaymentUrlResponse.ResponseCode,
+                    TransactionStatus = createPaymentUrlResponse.TransactionStatus,
+                    TxnRef = createPaymentUrlResponse.TxnRef,
+                    SecureHashType = createPaymentUrlResponse.SecureHashType,
+                    SecureHash = createPaymentUrlResponse.SecureHash,
+                    JsonData = JsonConvert.SerializeObject(createPaymentUrlResponse),
+                    ResponseCodeId = checkMessage.ResponseCodeId
+                };
+                await _detailPaymentService.CreateDataToDetailPaymentAsync(createDetailPaymentSandbox);
 
                 return new BaseResultWithData<object>
                 {
@@ -219,7 +236,7 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
                         createPaymentUrlResponse.TransactionStatus,
                         PaymentCompletion = DateTime
                             .ParseExact(createPaymentUrlResponse.PayDate, "yyyyMMddHHmmss",
-                                CultureInfo.InvariantCulture)
+                                        CultureInfo.InvariantCulture)
                             .ToString("MM/dd/yyyy HH:mm:ss")
                     },
                     IsSuccess = createPaymentUrlResponse.ResponseCode == "00",
@@ -249,19 +266,28 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
     {
         try
         {
+            if (!await CheckTransactionNo(refundRequest.TransactionNo))
+                return new BaseResultWithData<object>
+                {
+                    Data = null,
+                    IsSuccess = false,
+                    Message = $"No transaction exists with transaction code: {refundRequest.TransactionNo}",
+                    StatusCode = StatusCodes.Status404NotFound
+                };
+
             var refunRequestInfo =
                 await _detailPaymentService.GetTransactionInfoForRefundRequest(refundRequest.TransactionNo);
             var tick = DateTime.Now.Ticks.ToString();
-
+            var amoundInTransaction = await GetMoneyByTransactionNo(refundRequest.TransactionNo);
             var refundRequestModel = new RefundRequest
             {
                 RequestId = tick,
                 Version = _configuration["VNPaySanBox:Version"]!,
                 Command = "refund",
                 TmnCode = _configuration["VNPaySanBox:TmnCode"]!,
-                TransactionType = refundRequest.TransactionType,
+                TransactionType = _configuration["VNPaySanBox:Refund:TransactionType"]!,
                 TxnRef = refunRequestInfo.Data!.TxnRef,
-                Amount = Convert.ToInt64(refundRequest.Amount) * 100,
+                Amount = amoundInTransaction * 100,
                 OrderInfo = "Hoan tien giao dich:" + refunRequestInfo.Data!.TxnRef,
                 TransactionNo = refundRequest.TransactionNo,
                 CreateBy = refundRequest.CreateBy,
@@ -270,7 +296,7 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
                 SecureHash = string.Empty,
                 TransactionDate = refunRequestInfo.Data!.PayDate
             };
-            var vnp_HashSecret = _configuration["VNPaySanBox:HashSecret"]!;
+            var hashSecret = _configuration["VNPaySanBox:HashSecret"]!;
             var signData = refundRequestModel.RequestId + "|" + refundRequestModel.Version + "|" +
                            refundRequestModel.Command + "|" + refundRequestModel.TmnCode + "|" +
                            refundRequestModel.TransactionType + "|" + refundRequestModel.TxnRef + "|" +
@@ -280,7 +306,7 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
                            refundRequestModel.OrderInfo;
 
             //var signData = Helpers.signDataRefund(refundRequestModel);
-            var vnp_SecureHash = Utils.HmacSHA512(vnp_HashSecret, signData);
+            var secureHash = Utils.HmacSHA512(hashSecret, signData);
 
             var rfData = new
             {
@@ -297,9 +323,9 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
                 vnp_CreateBy = refundRequestModel.CreateBy,
                 vnp_CreateDate = refundRequestModel.CreateDate,
                 vnp_IpAddr = refundRequestModel.IpAddr,
-                vnp_SecureHash
+                vnp_SecureHash = secureHash
             };
-            using HttpClient client = new HttpClient();
+            using var client = new HttpClient();
             var content = new StringContent(JsonConvert.SerializeObject(rfData), Encoding.UTF8, "application/json");
 
             var request = await client.PostAsync(_configuration["VNPaySanBox:PaymentRefundUrl"], content);
@@ -309,16 +335,13 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
                 var jsonString = await request.Content.ReadAsStringAsync();
                 jsonString = jsonString.Replace("vnp_", "");
                 var json = JsonDocument.Parse(jsonString).RootElement;
-                var dtest = JsonConvert.DeserializeObject<RefundResponse>(jsonString);
                 var data = json.GetObject<RefundResponse>();
-
+                var checkMessage =
+                    await _transactionCodeService.GetTransactionCodeByCodeAsync(data.ResponseCode!,
+                                                                                RequestTypeTransactionConstants.REFUND);
                 return new BaseResultWithData<object>
                 {
-                    Data = new
-                    {
-                        data,
-                        dtest
-                    },
+                    Data = checkMessage.Message,
                     IsSuccess = true
                 };
             }
@@ -335,10 +358,7 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
         }
     }
 
-    public Task<BaseResultWithData<object>> GetTransactionDetail(HttpContext context, string transactionId)
-    {
-        throw new NotImplementedException();
-    }
+    public Task<BaseResultWithData<object>> GetTransactionDetail(HttpContext context, string transactionId) => throw new NotImplementedException();
 
     private async Task<bool> CheckTransactionNo(long transactionNo)
     {
@@ -354,5 +374,16 @@ public class VnPaySandBoxRepository : IVNPaySandBoxServices
 
         // Return whether the merchant exists or not
         return data.FirstOrDefault() > 0;
+    }
+    private async Task<long> GetMoneyByTransactionNo(long transactionNo)
+    {
+        var query = @"SELECT
+                    Amount
+                  FROM
+                    DetailPayment
+                  WHERE
+                    TransactionNo = @TransactionNo";
+        var data = await _db.GetData<long, dynamic>(query, new { TransactionNo = transactionNo });
+        return data.FirstOrDefault();
     }
 }

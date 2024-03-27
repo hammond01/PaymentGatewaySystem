@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using PaymentGateway.Domain.Entities.ThirdParty;
 using PaymentGateway.Domain.Entities.ThirdParty.VNPayEntities;
 using PaymentGateway.Domain.Request;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace PaymentGateway.Ultils.Extension;
 
@@ -29,12 +29,12 @@ public class Helpers
         var terminalId = _configuration["InformationQR:terminalId"]!;
         var merchantName = _configuration["InformationQR:merchantName"]!;
 
-        var serviceCode = _configuration["JsonStringVNPay:serviceCode"]!; //default
-        var countryCode = _configuration["JsonStringVNPay:countryCode"]!; //default
-        var payType = _configuration["JsonStringVNPay:payType"]!; //default
-        var masterMerCode = _configuration["JsonStringVNPay:masterMerCode"]!; //default
-        var ccy = _configuration["JsonStringVNPay:ccy"]!; //default
-        var expDate = _configuration["JsonStringVNPay:expDate"]!; //default
+        var serviceCode = _configuration["JsonStringVNPay:serviceCode"]!;//default
+        var countryCode = _configuration["JsonStringVNPay:countryCode"]!;//default
+        var payType = _configuration["JsonStringVNPay:payType"]!;//default
+        var masterMerCode = _configuration["JsonStringVNPay:masterMerCode"]!;//default
+        var ccy = _configuration["JsonStringVNPay:ccy"]!;//default
+        var expDate = _configuration["JsonStringVNPay:expDate"]!;//default
 
         var data =
             $"{appId}|{merchantName}|{serviceCode}|{countryCode}|{masterMerCode}|{merchantType}|{merchantCode}|{terminalId}|{payType}|{productId}|{txnId}|{amount}|{tipAndFee}|{ccy}|{expDate}|{secretKey}";
@@ -44,7 +44,7 @@ public class Helpers
     public CreateQR CreateQRRequestToCreateQR(CreateQrRequest createQRRequest)
     {
         var checkSumValue = CalculateMD5GenQR(createQRRequest.productId, createQRRequest.txnId,
-            createQRRequest.amount, createQRRequest.tipAndFee);
+                                              createQRRequest.amount, createQRRequest.tipAndFee);
         var data = new CreateQR
         {
             appId = _configuration["InformationAPI:GenQR:appId"]!,
@@ -73,8 +73,7 @@ public class Helpers
 
     private Task<string> CaculateGenQR(string input)
     {
-        return Task.Run(() =>
-        {
+        return Task.Run(() => {
             using var md5 = MD5.Create();
             var inputBytes = Encoding.ASCII.GetBytes(input);
             var hashBytes = md5.ComputeHash(inputBytes);
@@ -85,9 +84,5 @@ public class Helpers
         });
     }
 
-    public static string signDataRefund(RefundRequest refundRequest)
-    {
-        return @$"{refundRequest.RequestId} | {refundRequest.Version} | {refundRequest.Command} | {refundRequest.TmnCode} | {refundRequest.TransactionType} | {refundRequest.TxnRef} | {refundRequest.Amount} | {refundRequest.TransactionNo} | {refundRequest.TransactionDate} | {refundRequest.CreateBy} | {refundRequest.CreateDate} | {refundRequest.IpAddr} | {refundRequest.OrderInfo}";
-    }
-
+    public static string signDataRefund(RefundRequest refundRequest) => @$"{refundRequest.RequestId} | {refundRequest.Version} | {refundRequest.Command} | {refundRequest.TmnCode} | {refundRequest.TransactionType} | {refundRequest.TxnRef} | {refundRequest.Amount} | {refundRequest.TransactionNo} | {refundRequest.TransactionDate} | {refundRequest.CreateBy} | {refundRequest.CreateDate} | {refundRequest.IpAddr} | {refundRequest.OrderInfo}";
 }
